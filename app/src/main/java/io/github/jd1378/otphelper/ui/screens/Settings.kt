@@ -49,6 +49,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import io.github.jd1378.otphelper.gmail.GmailAccountStore
 import io.github.jd1378.otphelper.gmail.GmailFetchActivity
+import io.github.jd1378.otphelper.gmail.GmailFetchWorker
 import io.github.jd1378.otphelper.ModeOfOperation
 import io.github.jd1378.otphelper.R
 import io.github.jd1378.otphelper.repository.UserSettingsRepositoryMock
@@ -162,12 +163,7 @@ fun Settings(
           }
           Button(
               modifier = Modifier.fillMaxWidth(),
-              onClick = {
-                context.startActivity(
-                    Intent(context, GmailFetchActivity::class.java)
-                        .setAction(GmailFetchActivity.ACTION_FETCH)
-                )
-              },
+              onClick = { GmailFetchWorker.enqueue(context) },
           ) {
             Text(stringResource(R.string.gmail_fetch_otp))
           }

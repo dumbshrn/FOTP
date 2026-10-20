@@ -42,6 +42,61 @@ class NotificationHelper {
     fun createNotificationChannels(context: Context) {
       createPermissionRevokedChannel(context)
       createDetectedChannel(context)
+      createGmailFetchChannel(context)
+    }
+
+    private fun createGmailFetchChannel(context: Context): String {
+      val channelId = context.getString(R.string.gmail_fetch_channel_id)
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val channel =
+            NotificationChannel(
+                channelId,
+                context.getString(R.string.gmail_fetch_channel_name),
+                NotificationManager.IMPORTANCE_LOW,
+            ).apply {
+              description = context.getString(R.string.gmail_fetch_channel_description)
+            }
+        NotificationManagerCompat.from(context).createNotificationChannel(channel)
+      }
+      return channelId
+    }
+
+    @SuppressLint("MissingPermission")
+    fun sendGmailFetchProgress(context: Context, message: String) {
+      if (!hasNotifPermission(context)) return
+      val notification =
+          NotificationCompat.Builder(context, createGmailFetchChannel(context))
+              .setSmallIcon(R.drawable.ic_launcher_foreground)
+              .setContentTitle(context.getString(R.string.gmail_otp_title))
+              .setContentText(message)
+              .setCategory(Notification.CATEGORY_SERVICE)
+              .setPriority(NotificationCompat.PRIORITY_LOW)
+              .setOnlyAlertOnce(true)
+              .setOngoing(true)
+              .setTimeoutAfter(120_000)
+              .setProgress(0, 0, true)
+              .build()
+      NotificationManagerCompat.from(context).notify(R.id.gmail_fetch_notify_id, notification)
+    }
+
+    @SuppressLint("MissingPermission")
+    fun sendGmailFetchResult(context: Context, message: String) {
+      if (!hasNotifPermission(context)) return
+      val notification =
+          NotificationCompat.Builder(context, createGmailFetchChannel(context))
+              .setSmallIcon(R.drawable.ic_launcher_foreground)
+              .setContentTitle(context.getString(R.string.gmail_otp_title))
+              .setContentText(message)
+              .setCategory(Notification.CATEGORY_STATUS)
+              .setPriority(NotificationCompat.PRIORITY_LOW)
+              .setOnlyAlertOnce(true)
+              .setAutoCancel(true)
+              .build()
+      NotificationManagerCompat.from(context).notify(R.id.gmail_fetch_notify_id, notification)
+    }
+
+    fun clearGmailFetchProgress(context: Context) {
+      NotificationManagerCompat.from(context).cancel(R.id.gmail_fetch_notify_id)
     }
 
     private fun createPermissionRevokedChannel(context: Context): String {

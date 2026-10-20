@@ -66,6 +66,11 @@ class GmailFetchActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    if (intent.action == ACTION_FETCH) {
+      GmailFetchWorker.enqueue(applicationContext)
+      finish()
+      return
+    }
     setContentView(createContent())
     if (savedInstanceState != null) {
       restoreState(savedInstanceState)

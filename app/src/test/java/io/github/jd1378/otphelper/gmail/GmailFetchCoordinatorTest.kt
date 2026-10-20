@@ -3,8 +3,32 @@ package io.github.jd1378.otphelper.gmail
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 
 class GmailFetchCoordinatorTest {
+  @Test
+  fun fetchesAccountsConcurrentlyWithoutExceedingTheConfiguredLimit() = runBlocking {
+    val activeFetches = AtomicInteger()
+    val peakFetches = AtomicInteger()
+
+    val outcomes =
+        GmailFetchCoordinator.fetchAccounts(
+            accounts = listOf("one@gmail.com", "two@gmail.com", "three@gmail.com", "four@gmail.com"),
+            maxConcurrent = 2,
+        ) { email ->
+          val active = activeFetches.incrementAndGet()
+          peakFetches.updateAndGet { maxOf(it, active) }
+          delay(50)
+          activeFetches.decrementAndGet()
+          AccountFetchOutcome(email, result(email, "123456", 100))
+        }
+
+    assertEquals(4, outcomes.size)
+    assertEquals(2, peakFetches.get())
+  }
+
   @Test
   fun choosesCandidateWithNewestReceivedTimestampAcrossAccounts() {
     val summary =

@@ -28,6 +28,14 @@
   <string name="gmail_history_entry">Gmail OTP: %1$s</string>
   <string name="gmail_otp_title">Gmail OTP</string>
   <string name="gmail_fetch_help">Fetches OTPs on demand from your recent inbox using read-only access. Nothing is monitored in the background.</string>
+  <string name="gmail_fetch_channel_name">Gmail OTP fetch</string>
+  <string name="gmail_fetch_channel_description">Progress and results for manual Gmail OTP fetches</string>
+  <string name="gmail_fetch_channel_id" translatable="false">gmail_fetch_status</string>
+  <string name="gmail_fetch_progress">Checking Gmail accounts: %1$d of %2$d complete</string>
+  <string name="gmail_fetch_no_accounts">No Gmail accounts are connected. Add an account in Settings.</string>
+  <string name="gmail_fetch_no_code_result">No OTP found in recent inbox messages.</string>
+  <string name="gmail_fetch_failed_result">Gmail could not be checked. Reconnect the account in Settings and try again.</string>
+  <string name="gmail_fetch_ready_result">Gmail check complete.</string>
   <string name="detected_code">Detected Code:</string>
   <string name="code_detected_channel_name">Code Detected</string>
   <string name="code_detected_channel_description">whenever a code is detected, a notification will be sent from this channel</string>

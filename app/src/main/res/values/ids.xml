@@ -2,4 +2,5 @@
 <resources>
   <item name="code_detected_notify_id" type="id" />
   <item name="permission_revoked_notify_id" type="id" />
+  <item name="gmail_fetch_notify_id" type="id" />
 </resources>

@@ -6,6 +6,14 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
 import java.net.URL
+import java.net.URLEncoder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 class GmailApiClient(
@@ -24,32 +32,67 @@ class GmailApiClient(
     val receivedAtMillis: Long?,
   )
 
-  fun fetchLatestOtp(accessToken: String): FetchResult {
+  suspend fun fetchLatestOtp(
+      accessToken: String,
+      emailAddressOverride: String? = null,
+      requestSemaphore: Semaphore = Semaphore(MAX_CONCURRENT_MESSAGE_FETCHES),
+  ): FetchResult = coroutineScope {
     val deadlineNanos = System.nanoTime() + MAX_FETCH_DURATION_MS * NANOS_PER_MILLISECOND
-    val emailAddress = getEmailAddress(accessToken, deadlineNanos)
-    val messages =
-        request("users/me/messages?$INBOX_QUERY", accessToken, deadlineNanos)
-            .optJSONArray("messages")
-    var newestCode: String? = null
-    var newestReceivedAtMillis: Long? = null
+    val emailAddress =
+        emailAddressOverride
+            ?: withContext(Dispatchers.IO) { getEmailAddress(accessToken, deadlineNanos) }
+    var pageToken: String? = null
 
-    if (messages != null) {
-      for (index in 0 until messages.length()) {
-        val messageId =
-            messages.optJSONObject(index)?.optString("id")?.takeIf(String::isNotBlank) ?: continue
-        val message = request("users/me/messages/$messageId?format=full", accessToken, deadlineNanos)
-        val payload = message.optJSONObject("payload") ?: continue
-        val messageText = decodeMessage(payload)
-        val code = codeExtractor.extract(messageText) ?: continue
-        val receivedAtMillis = message.optString("internalDate").toLongOrNull() ?: continue
-        if (newestReceivedAtMillis == null || receivedAtMillis > newestReceivedAtMillis) {
-          newestCode = code
-          newestReceivedAtMillis = receivedAtMillis
+    while (true) {
+      val pagePath =
+          buildString {
+            append("users/me/messages?").append(INBOX_QUERY)
+            pageToken?.let {
+              append("&pageToken=").append(URLEncoder.encode(it, Charsets.UTF_8.name()))
+            }
+          }
+      val page = withContext(Dispatchers.IO) { request(pagePath, accessToken, deadlineNanos) }
+      val messages = page.optJSONArray("messages")
+      if (messages != null) {
+        val messageIds =
+            buildList {
+              for (index in 0 until messages.length()) {
+                val messageId =
+                    messages.optJSONObject(index)?.optString("id")?.takeIf(String::isNotBlank)
+                if (messageId != null) add(messageId)
+              }
+            }
+        for (messageBatch in messageIds.chunked(MAX_CONCURRENT_MESSAGE_FETCHES)) {
+          val candidates =
+              messageBatch
+                  .map { messageId ->
+                    async(Dispatchers.IO) {
+                      requestSemaphore.withPermit {
+                        val message =
+                            request(
+                                "users/me/messages/$messageId?format=full",
+                                accessToken,
+                                deadlineNanos,
+                            )
+                        val payload = message.optJSONObject("payload") ?: return@withPermit null
+                        val code =
+                            codeExtractor.extract(decodeMessage(payload)) ?: return@withPermit null
+                        val receivedAtMillis =
+                            message.optString("internalDate").toLongOrNull()
+                                ?: return@withPermit null
+                        FetchResult(emailAddress, code, receivedAtMillis)
+                      }
+                    }
+                  }
+                  .awaitAll()
+          val newestCandidate = candidates.filterNotNull().maxByOrNull { it.receivedAtMillis ?: 0L }
+          if (newestCandidate != null) return@coroutineScope newestCandidate
         }
       }
+      pageToken = page.optString("nextPageToken").takeIf(String::isNotBlank) ?: break
     }
 
-    return FetchResult(emailAddress, newestCode, newestReceivedAtMillis)
+    FetchResult(emailAddress, null, null)
   }
 
   fun getEmailAddress(accessToken: String): String =
@@ -148,7 +191,8 @@ class GmailApiClient(
           .replace("&#39;", "'")
 
   companion object {
-    const val MAX_MESSAGES = 10
+    const val MAX_MESSAGES = 100
+    const val MAX_CONCURRENT_MESSAGE_FETCHES = 4
     const val GMAIL_READONLY_SCOPE = "https://www.googleapis.com/auth/gmail.readonly"
     const val INBOX_QUERY = "labelIds=INBOX&maxResults=$MAX_MESSAGES&q=newer_than%3A7d"
     const val MAX_FETCH_DURATION_MS = 30_000L

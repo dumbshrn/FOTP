@@ -4,6 +4,10 @@ import java.io.ByteArrayInputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.Base64
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -48,14 +52,85 @@ class GmailApiClientTest {
   }
 
   @Test
-  fun capsInboxQueryToRecentMessages() {
-    assertEquals(10, GmailApiClient.MAX_MESSAGES)
-    assertEquals("labelIds=INBOX&maxResults=10&q=newer_than%3A7d", GmailApiClient.INBOX_QUERY)
-    assertEquals("https://www.googleapis.com/auth/gmail.readonly", GmailApiClient.GMAIL_READONLY_SCOPE)
+  fun requestsRecentInboxMessagesInHundredMessagePages() {
+    assertEquals(100, GmailApiClient.MAX_MESSAGES)
+    assertEquals("labelIds=INBOX&maxResults=100&q=newer_than%3A7d", GmailApiClient.INBOX_QUERY)
+    assertEquals(
+        "https://www.googleapis.com/auth/gmail.readonly",
+        GmailApiClient.GMAIL_READONLY_SCOPE,
+    )
   }
 
   @Test
-  fun selectsNewestMessageThatContainsCodeInsteadOfFirstListedMessage() {
+  fun paginatesRecentMessagesUntilItFindsTheNewestCode() = runBlocking {
+    val responses =
+        mapOf(
+            "/gmail/v1/users/me/profile" to """{"emailAddress":"one@gmail.com"}""",
+            "/gmail/v1/users/me/messages" to
+                """{"messages":[{"id":"newest-no-code"}],"nextPageToken":"older-page"}""",
+            "/gmail/v1/users/me/messages?pageToken=older-page" to
+                """{"messages":[{"id":"older-code"}]}""",
+            "/gmail/v1/users/me/messages/newest-no-code" to
+                message("300", "Your account update is complete"),
+            "/gmail/v1/users/me/messages/older-code" to
+                message("200", "Your verification code is 654321"),
+        )
+    val apiClient =
+        GmailApiClient(
+            GmailCodeExtractor(),
+            openConnection = { url ->
+              val key =
+                  if (url.query.orEmpty().contains("pageToken=older-page")) {
+                    "${url.path}?pageToken=older-page"
+                  } else {
+                    url.path
+                  }
+              FakeHttpURLConnection(url, responses.getValue(key))
+            },
+            decodeBase64Url = { Base64.getUrlDecoder().decode(it) },
+        )
+
+    val result = apiClient.fetchLatestOtp("token")
+
+    assertEquals("654321", result.code)
+    assertEquals(200L, result.receivedAtMillis)
+  }
+
+  @Test
+  fun requestsMessagesConcurrentlyWithinEachPage() = runBlocking {
+    val messageCount = 4
+    val remainingMessages = AtomicInteger(messageCount)
+    val allMessagesStarted = CountDownLatch(messageCount)
+    val responses =
+        mapOf(
+            "/gmail/v1/users/me/profile" to """{"emailAddress":"one@gmail.com"}""",
+            "/gmail/v1/users/me/messages" to
+                """{"messages":[{"id":"one"},{"id":"two"},{"id":"three"},{"id":"four"}]}""",
+        )
+    val apiClient =
+        GmailApiClient(
+            GmailCodeExtractor(),
+            openConnection = { url ->
+              val response =
+                  responses[url.path]
+                      ?: run {
+                        allMessagesStarted.countDown()
+                        check(allMessagesStarted.await(2, TimeUnit.SECONDS))
+                        message("${remainingMessages.decrementAndGet()}", "No verification code here")
+                      }
+              FakeHttpURLConnection(url, response)
+            },
+            decodeBase64Url = { Base64.getUrlDecoder().decode(it) },
+        )
+
+    val result = apiClient.fetchLatestOtp("token")
+
+    assertNull(result.code)
+    assertEquals(0L, allMessagesStarted.count)
+  }
+
+  @Test
+  fun selectsNewestMessageThatContainsCodeInsteadOfFirstListedMessage() = runBlocking {
     val responses =
         mapOf(
             "/gmail/v1/users/me/profile" to """{"emailAddress":"one@gmail.com"}""",
@@ -83,7 +158,7 @@ class GmailApiClientTest {
   }
 
   @Test
-  fun returnsNoTimestampWhenNoMessageContainsCode() {
+  fun returnsNoTimestampWhenNoMessageContainsCode() = runBlocking {
     val responses =
         mapOf(
             "/gmail/v1/users/me/profile" to """{"emailAddress":"one@gmail.com"}""",
@@ -105,7 +180,7 @@ class GmailApiClientTest {
   }
 
   @Test
-  fun ignoresCodeMessagesWithoutValidReceivedTimestamp() {
+  fun ignoresCodeMessagesWithoutValidReceivedTimestamp() = runBlocking {
     val responses =
         mapOf(
             "/gmail/v1/users/me/profile" to """{"emailAddress":"one@gmail.com"}""",
