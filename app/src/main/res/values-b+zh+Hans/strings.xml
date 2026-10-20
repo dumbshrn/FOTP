@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">复制验证码</string>
   <string name="detected_code">验证码：</string>
   <string name="code_detected_channel_name">检测到验证码</string>
   <string name="code_detected_channel_description">检测到验证码时，会从本频道发送一条通知</string>

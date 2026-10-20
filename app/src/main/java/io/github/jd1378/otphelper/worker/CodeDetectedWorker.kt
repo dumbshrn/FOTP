@@ -49,6 +49,7 @@ constructor(
     var text = inputData.getString("text")
     var code = inputData.getString("code")
     val isSms = inputData.getBoolean("is_sms", false)
+    val isGmail = inputData.getBoolean("is_gmail", false)
 
     val missingData =
         when {
@@ -69,12 +70,13 @@ constructor(
     text = text!!
 
     val isIgnored =
-        ignoredNotifsRepository.isIgnored(
-            packageName = packageName,
-            notificationId = notificationId,
-            notificationTag = notificationTag,
-            smsOrigin = smsOrigin,
-        )
+        !isGmail &&
+            ignoredNotifsRepository.isIgnored(
+                packageName = packageName,
+                notificationId = notificationId,
+                notificationTag = notificationTag,
+                smsOrigin = smsOrigin,
+            )
 
     if (isIgnored) {
       AppLogger.i(TAG, "detection ignored (pkg=$packageName, smsOrigin=$smsOrigin), aborting")

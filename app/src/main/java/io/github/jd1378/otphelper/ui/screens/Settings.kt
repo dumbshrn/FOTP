@@ -1,6 +1,7 @@
 package io.github.jd1378.otphelper.ui.screens
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,7 +44,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import io.github.jd1378.otphelper.gmail.GmailFetchActivity
 import io.github.jd1378.otphelper.ModeOfOperation
 import io.github.jd1378.otphelper.R
 import io.github.jd1378.otphelper.repository.UserSettingsRepositoryMock
@@ -71,6 +75,13 @@ fun Settings(
   val focusManager = LocalFocusManager.current
   var isInitialLoad by remember { mutableStateOf(true) }
   var targetPackageName by remember { mutableStateOf("") }
+  var connectedGmail by remember { mutableStateOf<String?>(null) }
+
+  LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+    connectedGmail =
+        context.getSharedPreferences(GmailFetchActivity.PREFS_NAME, 0)
+            .getString(GmailFetchActivity.PREF_EMAIL, null)
+  }
 
   LaunchedEffect(Unit) {
     scope.launch {
@@ -98,6 +109,56 @@ fun Settings(
                 .verticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_sections)),
     ) {
+      Surface(
+          color = MaterialTheme.colorScheme.surfaceContainer,
+          shape = MaterialTheme.shapes.large,
+      ) {
+        Column(
+            modifier =
+                Modifier.padding(
+                    horizontal = dimensionResource(R.dimen.padding_li_h),
+                    vertical = dimensionResource(R.dimen.padding_li_v),
+                ),
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_settings)),
+        ) {
+          Text(stringResource(R.string.gmail_otp_title), style = MaterialTheme.typography.titleMedium)
+          connectedGmail?.let { Text(stringResource(R.string.gmail_connected_account, it)) }
+          if (connectedGmail == null) {
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                  context.startActivity(
+                      Intent(context, GmailFetchActivity::class.java)
+                          .setAction(GmailFetchActivity.ACTION_CONNECT)
+                  )
+                },
+            ) {
+              Text(stringResource(R.string.gmail_connect))
+            }
+          }
+          Button(
+              modifier = Modifier.fillMaxWidth(),
+              onClick = { context.startActivity(Intent(context, GmailFetchActivity::class.java)) },
+          ) {
+            Text(stringResource(R.string.gmail_fetch_otp))
+          }
+          if (connectedGmail != null) {
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                  context.startActivity(
+                      Intent(context, GmailFetchActivity::class.java)
+                          .setAction(GmailFetchActivity.ACTION_DISCONNECT)
+                  )
+                },
+            ) {
+              Text(stringResource(R.string.gmail_disconnect))
+            }
+          }
+          SettingHelp(stringResource(R.string.gmail_fetch_help))
+        }
+      }
+
       SettingPageLink(
           modifier =
               Modifier.clickable {

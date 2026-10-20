@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">کپی رمز پیامک</string>
   <string name="detected_code">کد شناسایی شده:</string>
   <string name="code_detected_channel_name">شناسایی کد</string>
   <string name="code_detected_channel_description">هر زمان که یک کد شناسایی شود، یک اعلان از این کانال ارسال می شود</string>

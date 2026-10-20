@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Salin Kode SMS</string>
     <string name="detected_code">Kode Terdeteksi:</string>
     <string name="code_detected_channel_name">Kode Terdeteksi</string>
     <string name="code_detected_channel_description">ketika kode terdeteksi, notifikasi akan dikirim dari kanal ini</string>

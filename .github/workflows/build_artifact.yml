@@ -1,8 +1,9 @@
 name: Build artifact (signed release)
 
-# Manual-only build that produces a release-signed, installable APK and uploads
-# it as a workflow artifact. It does NOT publish a GitHub release and does NOT
-# push to Google Play. Use it to hand a production-faithful build to a user for
+# Builds on pushes to main and on manual dispatch, producing a release-signed,
+# installable APK and uploading it as a workflow artifact. It does NOT publish
+# a GitHub release and does NOT push to Google Play. Use it to hand a
+# production-faithful build to a user for
 # log capture:
 #
 #   adb logcat -s OtpHelper:*
@@ -14,6 +15,9 @@ name: Build artifact (signed release)
 # uses a fixed string tag, so the single-tag logcat filter keeps working.
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -42,8 +46,8 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build normal release APK
-        run: ./gradlew --no-daemon :app:assembleNormalRelease --stacktrace
+      - name: Test and build normal release APK
+        run: ./gradlew --no-daemon :app:testNormalDebugUnitTest :app:assembleNormalRelease --stacktrace
 
       - name: Sign release APK
         uses: r0adkll/sign-android-release@v1
@@ -61,7 +65,25 @@ jobs:
       - name: Upload signed APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: otphelper-normal-release-signed-apk
+          name: otp-helper-normal-release-signed-apk
           path: app/build/outputs/apk/normal/release/*signed.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: Report OAuth app identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk=$(find app/build/outputs/apk/normal/release -name '*signed.apk' -print -quit)
+          test -n "$apk"
+          build_tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
+          application_id=$($build_tools/aapt dump badging "$apk" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")
+          sha1=$($build_tools/apksigner verify --print-certs "$apk" | sed -n 's/.*certificate SHA-1 digest: //p' | head -n 1 | tr '[:lower:]' '[:upper:]')
+          test "$application_id" = "com.dumbshrn.otphelper"
+          test -n "$sha1"
+          formatted_sha1=$(echo "$sha1" | sed 's/../&:/g; s/:$//')
+          {
+            echo "### Android OAuth identity"
+            echo "- Application ID: `$application_id`"
+            echo "- APK signer SHA-1: `$formatted_sha1`"
+          } >> "$GITHUB_STEP_SUMMARY"

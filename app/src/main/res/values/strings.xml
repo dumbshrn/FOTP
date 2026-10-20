@@ -1,5 +1,19 @@
 <resources>
-  <string name="app_name">Copy SMS Code</string>
+  <string name="app_name">OTP Helper</string>
+  <string name="gmail_connect">Connect Gmail</string>
+  <string name="gmail_fetch_otp">Fetch OTP from Gmail</string>
+  <string name="gmail_disconnect">Disconnect Gmail</string>
+  <string name="gmail_connected_account">Connected Gmail: %1$s</string>
+  <string name="gmail_connected_success">Gmail connected.</string>
+  <string name="gmail_tile_name">Fetch Gmail OTP</string>
+  <string name="gmail_authorization_cancelled">Gmail authorization cancelled.</string>
+  <string name="gmail_fetch_failed">Could not fetch Gmail. Check your connection and authorization.</string>
+  <string name="gmail_no_code_found">No OTP found in recent inbox messages.</string>
+  <string name="gmail_code_fetched">Gmail OTP fetched.</string>
+  <string name="gmail_disconnect_failed">Could not disconnect Gmail authorization.</string>
+  <string name="gmail_history_entry">Gmail OTP: %1$s</string>
+  <string name="gmail_otp_title">Gmail OTP</string>
+  <string name="gmail_fetch_help">Fetches OTPs on demand from your recent inbox using read-only access. Nothing is monitored in the background.</string>
   <string name="detected_code">Detected Code:</string>
   <string name="code_detected_channel_name">Code Detected</string>
   <string name="code_detected_channel_description">whenever a code is detected, a notification will be sent from this channel</string>
@@ -134,8 +148,8 @@
   <string name="copy_cleanup_regex">Copy cleanup regex</string>
   <string name="new_cleanup_phrase">New Cleanup Phrase</string>
   <string name="cleanup_phrases_desc">Phrases defined here will be removed from the messages before applying detection logic. You can use this to fix issues with incorrectly detected code.</string>
-  <string name="adb_command_sensitive_notifs" translatable="false">adb shell cmd appops set --user 0 io.github.jd1378.otphelper RECEIVE_SENSITIVE_NOTIFICATIONS allow</string>
-  <string name="adb_command_kill_app" translatable="false">adb shell am force-stop io.github.jd1378.otphelper</string>
+  <string name="adb_command_sensitive_notifs" translatable="false">adb shell cmd appops set --user 0 com.dumbshrn.otphelper RECEIVE_SENSITIVE_NOTIFICATIONS allow</string>
+  <string name="adb_command_kill_app" translatable="false">adb shell am force-stop com.dumbshrn.otphelper</string>
   <string name="sms_origin">Origin</string>
   <string name="ignore_origin">Ignore Origin</string>
   <string name="allow_origin">Allow Origin</string>

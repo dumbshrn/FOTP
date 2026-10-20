@@ -31,7 +31,6 @@
   <string name="failed_to_open_app_settings">アプリ設定を開くことができません</string>
   <string name="failed_to_open_link">このリンクを開くアプリが見つかりません</string>
   <string name="detected_code">検出されたコード:</string>
-  <string name="app_name">Copy SMS Code</string>
   <string name="ignore">除外</string>
   <string name="IGNORED_LIST_ROUTE">除外リスト</string>
   <string name="ignored_list">除外リスト</string>

@@ -33,18 +33,18 @@ function navigate {
 }
 
 function restart_app {
-    adb shell am force-stop io.github.jd1378.otphelper
+    adb shell am force-stop com.dumbshrn.otphelper
     goto_app
     sleep 1
 }
 
 function change_lang {
-    adb shell cmd locale set-app-locales io.github.jd1378.otphelper --user current --locales $1
+    adb shell cmd locale set-app-locales com.dumbshrn.otphelper --user current --locales $1
     sleep 1.5
 }
 
 function reset_lang {
-    adb shell am set-app-locales --package io.github.jd1378.otphelper --locales ""
+    adb shell am set-app-locales --package com.dumbshrn.otphelper --locales ""
     sleep 1.5
 }
 
@@ -85,7 +85,7 @@ function goto_home {
 }
 
 function goto_app {
-    adb shell am start io.github.jd1378.otphelper/.MainActivity
+    adb shell am start com.dumbshrn.otphelper/.MainActivity
 }
 
 function enable_dark_mode {

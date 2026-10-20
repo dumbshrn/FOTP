@@ -80,7 +80,6 @@
   <string name="copied">복사됨</string>
   <string name="open_notification_permission">알림 권한 열기</string>
   <string name="label_back">이전</string>
-  <string name="app_name">SMS 코드 복사</string>
   <string name="code_detected_channel_description">코드가 감지되면 이 채널로 알림이 전송됩니다</string>
   <string name="code_copied_to_clipboard">클립보드에 복사되었습니다!</string>
   <string name="copy_to_clipboard">클립보드에 복사</string>

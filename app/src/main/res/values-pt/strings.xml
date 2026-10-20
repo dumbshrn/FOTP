@@ -2,7 +2,6 @@
 <resources>
     <string name="permission_todo_allow_restricted_settings">Permitir configurações restritas</string>
     <string name="perm_restricted_desc">Se você não conseguiu permitir a leitura de notificações, tente habilitar "Permitir configurações restritas" nas configurações do aplicativo</string>
-    <string name="app_name">Copiar Código do SMS</string>
     <string name="code_detected_channel_name">Código Detectado</string>
     <string name="code_detected_channel_description">quando um código é detectado, uma notificação vai ser enviada por este canal</string>
     <string name="code_copied_to_clipboard">Copiado à área de transferência!</string>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">SMS कोड कॉपी करें</string>
   <string name="detected_code">पता लगाया गया कोड:</string>
   <string name="code_detected_channel_name">OTP का पता चला</string>
   <string name="code_detected_channel_description">जब भी किसी ओटीपी का पता चलेगा, इस चैनल से एक अधिसूचना भेजी जाएगी</string>

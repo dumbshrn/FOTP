@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Copiază codul SMS</string>
     <string name="detected_code">Codul detectat:</string>
     <string name="code_detected_channel_name">Cod detectat</string>
     <string name="code_detected_channel_description">Ori de câte ori este detectat un cod, o notificare va fi trimisă de pe acest canal</string>

@@ -18,7 +18,6 @@
   <string name="skip">Pomiń</string>
   <string name="finish">Zakończ</string>
   <string name="system_default">Domyślny systemu</string>
-  <string name="app_name">Skopiuj kod SMS</string>
   <string name="detected_code">Wykryty kod:</string>
   <string name="code_detected_channel_name">Kod wykryty</string>
   <string name="code_copied_to_clipboard">Skopiowano do schowka!</string>

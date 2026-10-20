@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Finde SMS Codes</string>
   <string name="detected_code">Code gefunden:</string>
   <string name="code_detected_channel_name">Code gefunden</string>
   <string name="code_detected_channel_description">Wenn ein Code detektiert wird, wird eine Benachrichtigung in diesem Kanal gesendet</string>

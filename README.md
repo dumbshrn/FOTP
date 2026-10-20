@@ -1,20 +1,18 @@
-# COPY SMS CODE | OTP Helper | کپی رمز پیامک
+# OTP Helper
 
-An open-source application that allows you to copy OTP and codes from SMS and notifications automatically by reading all of your notifications.
+An open-source application that detects OTPs from SMS and notifications and copies them automatically. You can also fetch OTPs on demand from Gmail using the Quick Settings tile or the Settings screen.
 
-The application works completely offline and without internet permission. So you can be rest assured that your data does not leave your device.
+SMS and notification detection work locally. The optional Gmail feature uses Gmail's read-only API only when you explicitly fetch; it checks up to 10 recent inbox messages and does not monitor Gmail in the background or save message bodies. The detected code is handled using your existing copy, notification, and history preferences.
 
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
-     alt="Get it on F-Droid"
-     height="80">](https://f-droid.org/packages/io.github.jd1378.otphelper/)
-[<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
-     alt='Get it on Google Play'
-     height="80">](https://play.google.com/store/apps/details?id=io.github.jd1378.otphelper)
-[<img src="https://raw.githubusercontent.com/jd1378/otphelper/main/cafebazaar.png"
-     alt='Get it on Bazaar'
-     height="80">](https://cafebazaar.ir/app/io.github.jd1378.otphelper)
+Get the APK from [this repository's latest release](https://github.com/dumbshrn/otphelper/releases/latest), or run the signed-release workflow to create an APK artifact.
 
-or get the APK from [Latest Release](https://github.com/jd1378/otphelper/releases/latest).
+## Gmail OTP setup
+
+1. In Google Cloud, enable the Gmail API and configure the OAuth consent screen. While the app is in testing, add your Google account as a test user.
+2. Create an Android OAuth client for application ID `com.dumbshrn.otphelper` and the SHA-1 fingerprint of the signing key used for the APK. The manually triggered signed-release workflow prints both values in its run summary.
+3. Install the signed APK, open Settings, tap **Connect Gmail**, and approve Gmail read-only access. Then tap **Fetch OTP from Gmail**; you can also use the Quick Settings tile after adding it from the tile editor.
+
+The Android OAuth client ID is registered in Google Cloud; this app uses Google Play services authorization and does not embed a web client secret or persist OAuth tokens. The Android OAuth client must match both this package and the release APK's SHA-1. For signed APK builds, configure this repository's Actions secrets `ANDROID_SIGNING_KEY`, `ANDROID_ALIAS`, `ANDROID_KEY_STORE_PASSWORD`, and `ANDROID_KEY_PASSWORD`; secrets in a different repository are not shared. Public distribution using Gmail read-only access may require Google OAuth verification.
 
 ## How it works
 
@@ -31,13 +29,13 @@ The app listens to all incoming SMS messages and then processes them in the same
 
 ## How to build
 
-Simply run:
+Build the normal release APK with:
 
 ```bash
-./gradlew :app:assembleRelease
+./gradlew :app:assembleNormalRelease
 ```
 
-The apk should be available in `apps/build/outputs/apk/release/` directory.
+The APK is available under `app/build/outputs/apk/normal/release/`.
 
 ## Credits
 

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">העתקת קוד SMS</string>
   <string name="detected_code">קוד שזוהה:</string>
   <string name="code_detected_channel_name">זוהה קוד</string>
   <string name="code_detected_channel_description">בכל פעם שיזוהה קוד, תישלח הודעה מערוץ זה</string>

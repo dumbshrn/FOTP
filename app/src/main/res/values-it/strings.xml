@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Copia codici SMS</string>
   <string name="detected_code">Codice rilevato:</string>
   <string name="code_detected_channel_name">Code rilevato</string>
   <string name="code_detected_channel_description">Quando un codice viene rilevato, verrà inviata una notifica</string>

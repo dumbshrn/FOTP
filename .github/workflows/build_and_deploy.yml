@@ -75,11 +75,11 @@ jobs:
         artifacts: app/build/outputs/apk/normal/release/*signed.apk,app/build/outputs/bundle/playRelease/*.aab
 
     - name: Push to Play Store
-      if: ${{ github.event_name == 'release' && !contains(github.ref, '-rc') }}
+      if: ${{ github.event_name == 'release' && !contains(github.ref, '-rc') && vars.ENABLE_GOOGLE_PLAY_PUBLISH == 'true' }}
       uses: r0adkll/upload-google-play@v1
       with:
         serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-        packageName: io.github.jd1378.otphelper
+        packageName: com.dumbshrn.otphelper
         releaseFiles: app/build/outputs/bundle/playRelease/*.aab
         track: internal
         status: draft

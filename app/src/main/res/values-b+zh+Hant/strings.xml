@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">簡訊驗證碼小幫手</string>
   <string name="detected_code">驗證碼：</string>
   <string name="code_detected_channel_name">偵測到驗證碼</string>
   <string name="code_detected_channel_description">偵測到驗證碼時，此頻道會發送一則通知</string>

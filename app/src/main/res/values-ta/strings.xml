@@ -14,7 +14,6 @@
   <string name="HOME_ROUTE">வீடு</string>
   <string name="IGNORED_LIST_ROUTE">புறக்கணிக்கப்பட்ட பட்டியல்</string>
   <string name="list_is_empty">பட்டியல் காலியாக உள்ளது</string>
-  <string name="app_name">எச்எம்எச் குறியீட்டை நகலெடுக்கவும்</string>
   <string name="detected_code">கண்டறியப்பட்ட குறியீடு:</string>
   <string name="code_detected_channel_name">குறியீடு கண்டறியப்பட்டது</string>
   <string name="code_detected_channel_description">ஒரு குறியீடு கண்டறியப்படும் போதெல்லாம், இந்த சேனலில் இருந்து அறிவிப்பு அனுப்பப்படும்</string>

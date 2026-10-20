@@ -48,7 +48,6 @@
   <string name="IGNORED_LIST_ROUTE">Llista d\'ignorats</string>
   <string name="no_result">No hi ha resultats</string>
   <string name="ignore_tag">Ignorar etiquetes</string>
-  <string name="app_name">Copy SMS Code</string>
   <string name="code_detected_channel_description">Sempre que es detecti un codi, s\'enviarà una notificació des d\'aquest canal.</string>
   <string name="open_notification_permission">Obre el permís de notificació</string>
   <string name="ignored_list_description">Els missatges ignorats es mostraran aquí després de prémer el botó d\'ignorar.</string>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">এসএমএস কোড কপি</string>
     <string name="detected_code">সনাক্ত করা কোড:</string>
     <string name="code_detected_channel_name">কোড সনাক্ত হয়েছে</string>
     <string name="code_detected_channel_description">যখনই একটি কোড সনাক্ত করা হবে, এই চ্যানেল থেকে একটি নোটিফিকেশন পাঠানো হবে ।</string>

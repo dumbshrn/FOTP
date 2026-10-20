@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Copiar Código SMS</string>
     <string name="detected_code">Código Detectado:</string>
     <string name="code_detected_channel_name">Código Detectado</string>
     <string name="code_detected_channel_description">cuando se detecta un código, se enviará una notificación desde este canal</string>
