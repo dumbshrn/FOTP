@@ -40,6 +40,7 @@ constructor(
       try {
         fetchAndNotify()
       } catch (error: CancellationException) {
+        NotificationHelper.clearGmailFetchProgress(applicationContext)
         throw error
       } catch (error: Exception) {
         NotificationHelper.sendGmailFetchResult(
@@ -155,11 +156,6 @@ constructor(
         .enqueue(OneTimeWorkRequestBuilder<CodeDetectedWorker>().setInputData(workData).build())
     NotificationHelper.clearGmailFetchProgress(context)
     return Result.success()
-  }
-
-  override fun onStopped() {
-    super.onStopped()
-    NotificationHelper.clearGmailFetchProgress(applicationContext)
   }
 
   companion object {
