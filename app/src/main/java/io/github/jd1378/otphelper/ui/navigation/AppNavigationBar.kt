@@ -2,7 +2,7 @@ package io.github.jd1378.otphelper.ui.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -31,7 +31,7 @@ fun AppNavigationBar(currentRoute: String?, onNavigate: (String) -> Unit) {
     NavigationBarItem(
         selected = currentPrimaryRoute == MainDestinations.HISTORY_ROUTE,
         onClick = { onNavigate(MainDestinations.HISTORY_ROUTE) },
-        icon = { Icon(Icons.Filled.History, contentDescription = null) },
+        icon = { Icon(Icons.Filled.DateRange, contentDescription = null) },
         label = { Text(stringResource(R.string.history)) },
     )
     NavigationBarItem(

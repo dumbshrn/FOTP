@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -22,10 +21,12 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -136,11 +137,9 @@ fun Home(
               color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
           OutlinedButton(
-              onClick = {
-                onNavigateToRoute(MainDestinations.PERMISSIONS_ROUTE, false, true)
-              },
+              onClick = { onNavigateToRoute(MainDestinations.PERMISSIONS_ROUTE, false, true) },
           ) {
-            Text(stringResource(R.string.permissions))
+            Text(stringResource(R.string.PERMISSION_ROUTE))
           }
         }
       }
@@ -203,7 +202,7 @@ private fun LatestCodeCard(
           color = MaterialTheme.colorScheme.onPrimaryContainer,
       )
       OutlinedButton(onClick = onCopy, enabled = code != null) {
-        Icon(Icons.Outlined.ContentCopy, contentDescription = null)
+        Icon(painterResource(R.drawable.baseline_content_copy_24), contentDescription = null)
         Text(stringResource(R.string.copy), modifier = Modifier.padding(start = 8.dp))
       }
     }
