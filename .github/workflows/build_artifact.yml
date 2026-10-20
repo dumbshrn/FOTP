@@ -1,8 +1,8 @@
 name: Build artifact (signed release)
 
-# Builds on pushes to main and on manual dispatch, producing a release-signed,
-# installable APK and uploading it as a workflow artifact. It does NOT publish
-# a GitHub release and does NOT push to Google Play. Use it to hand a
+# Builds a test APK on pushes to main and on manual dispatch. When release
+# signing secrets are configured, it also uploads a signed release APK. It
+# does NOT publish a GitHub release or push to Google Play. Use it to hand a
 # production-faithful build to a user for
 # log capture:
 #
@@ -46,10 +46,53 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Test and build normal release APK
-        run: ./gradlew --no-daemon :app:testNormalDebugUnitTest :app:assembleNormalRelease --stacktrace
+      - name: Test and build normal APKs
+        run: ./gradlew --no-daemon :app:testNormalDebugUnitTest :app:assembleNormalDebug :app:assembleNormalRelease --stacktrace
+
+      - name: Upload installable test APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: otp-helper-test-apk
+          path: app/build/outputs/apk/normal/debug/*.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Report test APK OAuth identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk=$(find app/build/outputs/apk/normal/debug -name '*.apk' -print -quit)
+          test -n "$apk"
+          build_tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
+          application_id=$($build_tools/aapt dump badging "$apk" | sed -n "s/^package: name='\\([^']*\\)'.*/\\1/p")
+          sha1=$($build_tools/apksigner verify --print-certs "$apk" | sed -n 's/.*certificate SHA-1 digest: //p' | head -n 1 | tr '[:lower:]' '[:upper:]')
+          test "$application_id" = "com.dumbshrn.otphelper"
+          test -n "$sha1"
+          formatted_sha1=$(echo "$sha1" | sed 's/../&:/g; s/:$//')
+          {
+            echo "### Test APK OAuth identity"
+            echo "- Application ID: `$application_id`"
+            echo "- Debug signer SHA-1: `$formatted_sha1`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check release signing secrets
+        id: signing
+        shell: bash
+        env:
+          ANDROID_SIGNING_KEY: ${{ secrets.ANDROID_SIGNING_KEY }}
+          ANDROID_ALIAS: ${{ secrets.ANDROID_ALIAS }}
+          ANDROID_KEY_STORE_PASSWORD: ${{ secrets.ANDROID_KEY_STORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [[ -n "$ANDROID_SIGNING_KEY" && -n "$ANDROID_ALIAS" && -n "$ANDROID_KEY_STORE_PASSWORD" && -n "$ANDROID_KEY_PASSWORD" ]]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "Release signing secrets are incomplete; only the test APK will be uploaded."
+          fi
 
       - name: Sign release APK
+        if: steps.signing.outputs.configured == 'true'
         uses: r0adkll/sign-android-release@v1
         with:
           releaseDirectory: app/build/outputs/apk/normal/release
@@ -62,7 +105,8 @@ jobs:
           # layers details inside docker hub. after `...-c SDK_TOOLS_URL=...`
           BUILD_TOOLS_VERSION: "33.0.1"
 
-      - name: Upload signed APK artifact
+      - name: Upload signed release APK artifact
+        if: steps.signing.outputs.configured == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: otp-helper-normal-release-signed-apk
@@ -71,6 +115,7 @@ jobs:
           retention-days: 30
 
       - name: Report OAuth app identity
+        if: steps.signing.outputs.configured == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -83,7 +128,7 @@ jobs:
           test -n "$sha1"
           formatted_sha1=$(echo "$sha1" | sed 's/../&:/g; s/:$//')
           {
-            echo "### Android OAuth identity"
+            echo "### Release APK OAuth identity"
             echo "- Application ID: `$application_id`"
             echo "- APK signer SHA-1: `$formatted_sha1`"
           } >> "$GITHUB_STEP_SUMMARY"
