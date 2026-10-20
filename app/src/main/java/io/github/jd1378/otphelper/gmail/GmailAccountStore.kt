@@ -54,7 +54,7 @@ class GmailAccountStore internal constructor(private val preferences: GmailAccou
   private fun decodeAccounts(serialized: String): List<String> =
       runCatching {
         val array = JSONArray(serialized)
-        buildList {
+        buildList<String> {
           for (index in 0 until array.length()) {
             val email = array.optString(index).trim()
             if (email.isNotEmpty() && none { it.equals(email, ignoreCase = true) }) add(email)
