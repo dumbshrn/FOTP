@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import io.github.jd1378.otphelper.gmail.GmailAccountStore
 import io.github.jd1378.otphelper.gmail.GmailFetchActivity
 import io.github.jd1378.otphelper.ModeOfOperation
 import io.github.jd1378.otphelper.R
@@ -75,12 +77,10 @@ fun Settings(
   val focusManager = LocalFocusManager.current
   var isInitialLoad by remember { mutableStateOf(true) }
   var targetPackageName by remember { mutableStateOf("") }
-  var connectedGmail by remember { mutableStateOf<String?>(null) }
+  var connectedGmails by remember { mutableStateOf(emptyList<String>()) }
 
   LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
-    connectedGmail =
-        context.getSharedPreferences(GmailFetchActivity.PREFS_NAME, 0)
-            .getString(GmailFetchActivity.PREF_EMAIL, null)
+    connectedGmails = GmailAccountStore(context).getAccounts()
   }
 
   LaunchedEffect(Unit) {
@@ -121,39 +121,56 @@ fun Settings(
                 ),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_settings)),
         ) {
-          Text(stringResource(R.string.gmail_otp_title), style = MaterialTheme.typography.titleMedium)
-          connectedGmail?.let { Text(stringResource(R.string.gmail_connected_account, it)) }
-          if (connectedGmail == null) {
-            Button(
+          Text(
+              stringResource(R.string.gmail_otp_title),
+              style = MaterialTheme.typography.titleMedium,
+          )
+          Text(stringResource(R.string.gmail_connected_accounts))
+          if (connectedGmails.isEmpty()) {
+            Text(stringResource(R.string.gmail_no_connected_accounts))
+          }
+          connectedGmails.forEach { emailAddress ->
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                  context.startActivity(
-                      Intent(context, GmailFetchActivity::class.java)
-                          .setAction(GmailFetchActivity.ACTION_CONNECT)
-                  )
-                },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement =
+                    Arrangement.spacedBy(dimensionResource(R.dimen.padding_settings)),
             ) {
-              Text(stringResource(R.string.gmail_connect))
+              Text(emailAddress, modifier = Modifier.weight(1f))
+              Button(
+                  onClick = {
+                    context.startActivity(
+                        Intent(context, GmailFetchActivity::class.java)
+                            .setAction(GmailFetchActivity.ACTION_DISCONNECT)
+                            .putExtra(GmailFetchActivity.EXTRA_EMAIL_ADDRESS, emailAddress)
+                    )
+                  },
+              ) {
+                Text(stringResource(R.string.gmail_disconnect))
+              }
             }
           }
           Button(
               modifier = Modifier.fillMaxWidth(),
-              onClick = { context.startActivity(Intent(context, GmailFetchActivity::class.java)) },
+              onClick = {
+                context.startActivity(
+                    Intent(context, GmailFetchActivity::class.java)
+                        .setAction(GmailFetchActivity.ACTION_CONNECT)
+                )
+              },
+          ) {
+            Text(stringResource(R.string.gmail_add_account))
+          }
+          Button(
+              modifier = Modifier.fillMaxWidth(),
+              onClick = {
+                context.startActivity(
+                    Intent(context, GmailFetchActivity::class.java)
+                        .setAction(GmailFetchActivity.ACTION_FETCH)
+                )
+              },
           ) {
             Text(stringResource(R.string.gmail_fetch_otp))
-          }
-          if (connectedGmail != null) {
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                  context.startActivity(
-                      Intent(context, GmailFetchActivity::class.java)
-                          .setAction(GmailFetchActivity.ACTION_DISCONNECT)
-                  )
-                },
-            ) {
-              Text(stringResource(R.string.gmail_disconnect))
-            }
           }
           SettingHelp(stringResource(R.string.gmail_fetch_help))
         }

@@ -18,7 +18,11 @@ class GmailApiClient(
     )
   },
 ) {
-  data class FetchResult(val emailAddress: String, val code: String?)
+  data class FetchResult(
+    val emailAddress: String,
+    val code: String?,
+    val receivedAtMillis: Long?,
+  )
 
   fun fetchLatestOtp(accessToken: String): FetchResult {
     val deadlineNanos = System.nanoTime() + MAX_FETCH_DURATION_MS * NANOS_PER_MILLISECOND
@@ -26,22 +30,26 @@ class GmailApiClient(
     val messages =
         request("users/me/messages?$INBOX_QUERY", accessToken, deadlineNanos)
             .optJSONArray("messages")
-    var code: String? = null
+    var newestCode: String? = null
+    var newestReceivedAtMillis: Long? = null
 
     if (messages != null) {
       for (index in 0 until messages.length()) {
         val messageId =
             messages.optJSONObject(index)?.optString("id")?.takeIf(String::isNotBlank) ?: continue
-        val payload =
-            request("users/me/messages/$messageId?format=full", accessToken, deadlineNanos)
-                .optJSONObject("payload") ?: continue
+        val message = request("users/me/messages/$messageId?format=full", accessToken, deadlineNanos)
+        val payload = message.optJSONObject("payload") ?: continue
         val messageText = decodeMessage(payload)
-        code = codeExtractor.extract(messageText)
-        if (code != null) break
+        val code = codeExtractor.extract(messageText) ?: continue
+        val receivedAtMillis = message.optString("internalDate").toLongOrNull() ?: continue
+        if (newestReceivedAtMillis == null || receivedAtMillis > newestReceivedAtMillis) {
+          newestCode = code
+          newestReceivedAtMillis = receivedAtMillis
+        }
       }
     }
 
-    return FetchResult(emailAddress, code)
+    return FetchResult(emailAddress, newestCode, newestReceivedAtMillis)
   }
 
   fun getEmailAddress(accessToken: String): String =
