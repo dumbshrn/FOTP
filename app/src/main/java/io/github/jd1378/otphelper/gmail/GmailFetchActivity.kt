@@ -26,6 +26,8 @@ import io.github.jd1378.otphelper.R
 import io.github.jd1378.otphelper.repository.UserSettingsRepository
 import io.github.jd1378.otphelper.utils.CodeExtractor
 import io.github.jd1378.otphelper.worker.CodeDetectedWorker
+import org.json.JSONArray
+import org.json.JSONObject
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -45,9 +47,12 @@ class GmailFetchActivity : AppCompatActivity() {
   private var fetchIndex = 0
   private var authorizationEmail: String? = null
   private var authorizationPurpose = AuthorizationPurpose.CONNECT
+  private var awaitingAuthorizationResult = false
+  private var showingResult = false
 
   private val authorizationLauncher =
       registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+        awaitingAuthorizationResult = false
         if (result.resultCode != Activity.RESULT_OK || result.data == null) {
           handleAuthorizationFailure()
           return@registerForActivityResult
@@ -63,7 +68,12 @@ class GmailFetchActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(createContent())
     if (savedInstanceState != null) {
-      showProgress(getString(R.string.gmail_working))
+      restoreState(savedInstanceState)
+      when {
+        showingResult -> showResult(resultText.text.toString())
+        awaitingAuthorizationResult -> showProgress(statusText.text.toString())
+        else -> resumePendingOperation()
+      }
       return
     }
     when (intent.action) {
@@ -73,6 +83,100 @@ class GmailFetchActivity : AppCompatActivity() {
         requestAuthorization(AuthorizationPurpose.CONNECT, forceAccountSelection = true)
       }
       else -> startFetching()
+    }
+  }
+
+  override fun onSaveInstanceState(outState: Bundle) {
+    super.onSaveInstanceState(outState)
+    outState.putStringArrayList(STATE_ACCOUNTS, ArrayList(accountsToFetch))
+    outState.putInt(STATE_FETCH_INDEX, fetchIndex)
+    outState.putString(STATE_AUTHORIZATION_EMAIL, authorizationEmail)
+    outState.putString(STATE_AUTHORIZATION_PURPOSE, authorizationPurpose.name)
+    outState.putBoolean(STATE_AWAITING_AUTHORIZATION, awaitingAuthorizationResult)
+    outState.putBoolean(STATE_SHOWING_RESULT, showingResult)
+    outState.putString(STATE_STATUS_TEXT, statusText.text.toString())
+    outState.putString(STATE_RESULT_TEXT, resultText.text.toString())
+    outState.putString(STATE_FETCH_OUTCOMES, encodeOutcomes())
+  }
+
+  private fun restoreState(state: Bundle) {
+    accountsToFetch = state.getStringArrayList(STATE_ACCOUNTS).orEmpty()
+    fetchIndex = state.getInt(STATE_FETCH_INDEX).coerceIn(0, accountsToFetch.size)
+    authorizationEmail = state.getString(STATE_AUTHORIZATION_EMAIL)
+    authorizationPurpose =
+        runCatching {
+              AuthorizationPurpose.valueOf(
+                  state.getString(STATE_AUTHORIZATION_PURPOSE).orEmpty()
+              )
+            }
+            .getOrDefault(AuthorizationPurpose.CONNECT)
+    awaitingAuthorizationResult = state.getBoolean(STATE_AWAITING_AUTHORIZATION)
+    showingResult = state.getBoolean(STATE_SHOWING_RESULT)
+    statusText.text = state.getString(STATE_STATUS_TEXT).orEmpty()
+    resultText.text = state.getString(STATE_RESULT_TEXT).orEmpty()
+    decodeOutcomes(state.getString(STATE_FETCH_OUTCOMES).orEmpty())
+  }
+
+  private fun resumePendingOperation() {
+    when (authorizationPurpose) {
+      AuthorizationPurpose.CONNECT ->
+          requestAuthorization(AuthorizationPurpose.CONNECT, forceAccountSelection = true)
+      AuthorizationPurpose.FETCH_ACCOUNT ->
+          requestAuthorization(AuthorizationPurpose.FETCH_ACCOUNT, authorizationEmail)
+      AuthorizationPurpose.FETCH_FIRST_ACCOUNT ->
+          requestAuthorization(
+              AuthorizationPurpose.FETCH_FIRST_ACCOUNT,
+              forceAccountSelection = true,
+          )
+      AuthorizationPurpose.DISCONNECT -> disconnectGmail(authorizationEmail)
+    }
+  }
+
+  private fun encodeOutcomes(): String =
+      JSONArray().apply {
+        fetchOutcomes.forEach { outcome ->
+          put(
+              JSONObject()
+                  .put("emailAddress", outcome.emailAddress)
+                  .put("failed", outcome.failed)
+                  .apply {
+                    outcome.result?.let { result ->
+                      put("code", result.code ?: JSONObject.NULL)
+                      put("receivedAtMillis", result.receivedAtMillis ?: JSONObject.NULL)
+                    }
+                  }
+          )
+        }
+      }
+          .toString()
+
+  private fun decodeOutcomes(serialized: String) {
+    fetchOutcomes.clear()
+    runCatching {
+      val values = JSONArray(serialized)
+      for (index in 0 until values.length()) {
+        val value = values.optJSONObject(index) ?: continue
+        val emailAddress = value.optString("emailAddress")
+        val hasResult = value.has("code") || value.has("receivedAtMillis")
+        val result =
+            if (hasResult) {
+              GmailApiClient.FetchResult(
+                  emailAddress,
+                  if (value.isNull("code")) null else value.optString("code"),
+                  if (value.isNull("receivedAtMillis")) null
+                  else value.optLong("receivedAtMillis"),
+              )
+            } else {
+              null
+            }
+        fetchOutcomes.add(
+            AccountFetchOutcome(
+                emailAddress,
+                result,
+                value.optBoolean("failed"),
+            )
+        )
+      }
     }
   }
 
@@ -144,6 +248,7 @@ class GmailFetchActivity : AppCompatActivity() {
   ) {
     authorizationPurpose = purpose
     authorizationEmail = emailAddress
+    awaitingAuthorizationResult = false
     val requestBuilder =
         AuthorizationRequest.builder()
             .setRequestedScopes(listOf(Scope(GmailApiClient.GMAIL_READONLY_SCOPE)))
@@ -167,11 +272,13 @@ class GmailFetchActivity : AppCompatActivity() {
         handleAuthorizationFailure()
         return
       }
+      awaitingAuthorizationResult = true
       authorizationLauncher.launch(
           androidx.activity.result.IntentSenderRequest.Builder(pendingIntent.intentSender).build()
       )
       return
     }
+    awaitingAuthorizationResult = false
 
     val accessToken = result.accessToken
     if (accessToken.isNullOrBlank()) {
@@ -182,6 +289,7 @@ class GmailFetchActivity : AppCompatActivity() {
       AuthorizationPurpose.CONNECT -> connect(accessToken)
       AuthorizationPurpose.FETCH_ACCOUNT -> fetchAccount(accessToken, authorizationEmail)
       AuthorizationPurpose.FETCH_FIRST_ACCOUNT -> fetchAccount(accessToken, null)
+      AuthorizationPurpose.DISCONNECT -> disconnectGmail(authorizationEmail)
     }
   }
 
@@ -195,6 +303,8 @@ class GmailFetchActivity : AppCompatActivity() {
       }
       AuthorizationPurpose.FETCH_FIRST_ACCOUNT ->
           showResult(getString(R.string.gmail_authorization_cancelled))
+      AuthorizationPurpose.DISCONNECT ->
+          showResult(getString(R.string.gmail_disconnect_failed))
     }
   }
 
@@ -237,17 +347,21 @@ class GmailFetchActivity : AppCompatActivity() {
             }
         val emailAddress = result.emailAddress.ifBlank { expectedEmail.orEmpty() }
         if (emailAddress.isBlank()) throw IllegalStateException("No Gmail account address returned")
-        if (expectedEmail == null && emailAddress.isNotBlank()) {
-          accountStore.addAccount(emailAddress)
-        }
+        val accountSaved = expectedEmail != null || accountStore.addAccount(emailAddress)
         fetchOutcomes.add(
             AccountFetchOutcome(
                 emailAddress,
                 result.copy(emailAddress = emailAddress),
+                failed = !accountSaved,
             )
         )
       } catch (error: Exception) {
-        fetchOutcomes.add(AccountFetchOutcome(expectedEmail.orEmpty(), failed = true))
+        fetchOutcomes.add(
+            AccountFetchOutcome(
+                expectedEmail ?: getString(R.string.gmail_selected_account),
+                failed = true,
+            )
+        )
       } finally {
         clearToken(accessToken)
       }
@@ -310,6 +424,8 @@ class GmailFetchActivity : AppCompatActivity() {
       showResult(getString(R.string.gmail_disconnect_failed))
       return
     }
+    authorizationPurpose = AuthorizationPurpose.DISCONNECT
+    authorizationEmail = emailAddress
     showProgress(getString(R.string.gmail_disconnect_in_progress))
     val request =
         RevokeAccessRequest.builder()
@@ -335,6 +451,7 @@ class GmailFetchActivity : AppCompatActivity() {
   }
 
   private fun showProgress(message: String) {
+    showingResult = false
     progressIndicator.visibility = View.VISIBLE
     resultText.visibility = View.GONE
     doneButton.visibility = View.GONE
@@ -343,6 +460,7 @@ class GmailFetchActivity : AppCompatActivity() {
   }
 
   private fun showResult(message: String) {
+    showingResult = true
     progressIndicator.visibility = View.GONE
     statusText.visibility = View.GONE
     resultText.visibility = View.VISIBLE
@@ -366,6 +484,7 @@ class GmailFetchActivity : AppCompatActivity() {
     CONNECT,
     FETCH_ACCOUNT,
     FETCH_FIRST_ACCOUNT,
+    DISCONNECT,
   }
 
   companion object {
@@ -376,5 +495,14 @@ class GmailFetchActivity : AppCompatActivity() {
     const val ACTION_CONNECT = "com.dumbshrn.otphelper.action.CONNECT_GMAIL"
     const val ACTION_DISCONNECT = "com.dumbshrn.otphelper.action.DISCONNECT_GMAIL"
     private const val GOOGLE_ACCOUNT_TYPE = "com.google"
+    private const val STATE_ACCOUNTS = "gmail_accounts"
+    private const val STATE_FETCH_INDEX = "gmail_fetch_index"
+    private const val STATE_AUTHORIZATION_EMAIL = "gmail_authorization_email"
+    private const val STATE_AUTHORIZATION_PURPOSE = "gmail_authorization_purpose"
+    private const val STATE_AWAITING_AUTHORIZATION = "gmail_awaiting_authorization"
+    private const val STATE_SHOWING_RESULT = "gmail_showing_result"
+    private const val STATE_STATUS_TEXT = "gmail_status_text"
+    private const val STATE_RESULT_TEXT = "gmail_result_text"
+    private const val STATE_FETCH_OUTCOMES = "gmail_fetch_outcomes"
   }
 }

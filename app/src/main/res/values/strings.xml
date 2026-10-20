@@ -15,14 +15,15 @@
   <string name="gmail_code_fetched">Gmail OTP fetched.</string>
   <string name="gmail_checking_accounts">Checking Gmail account %1$d of %2$d: %3$s…</string>
   <string name="gmail_code_source">Latest code: %1$s\nFrom: %2$s</string>
-  <string name="gmail_code_source_partial">Latest code: %1$s\nFrom: %2$s\nCould not check: %3$s</string>
-  <string name="gmail_no_code_accounts_failed">No OTP found. Could not check: %1$s</string>
+  <string name="gmail_code_source_partial">Latest code: %1$s\nFrom: %2$s\nAccount issues: %3$s</string>
+  <string name="gmail_no_code_accounts_failed">No OTP found. Account issues: %1$s</string>
   <string name="gmail_done">Done</string>
   <string name="gmail_select_account">Select a Gmail account to continue.</string>
   <string name="gmail_disconnect_in_progress">Disconnecting Gmail account…</string>
   <string name="gmail_working">Working with Gmail…</string>
   <string name="gmail_account_save_failed">Could not save this Gmail account on this device.</string>
   <string name="gmail_account_remove_failed">Access was revoked, but the account could not be removed from this device.</string>
+  <string name="gmail_selected_account">Selected Gmail account</string>
   <string name="gmail_disconnect_failed">Could not disconnect Gmail authorization.</string>
   <string name="gmail_history_entry">Gmail OTP: %1$s</string>
   <string name="gmail_otp_title">Gmail OTP</string>
