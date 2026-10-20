@@ -14,22 +14,22 @@ class GmailAccountStoreTest {
 
   @Test
   fun migratesLegacyAccountOnFirstRead() {
-    val preferences = FakeGmailAccountPreferences(legacyEmail = "one@gmail.com")
+    val preferences = FakeGmailAccountPreferences(storedLegacyEmail = "one@gmail.com")
     val store = GmailAccountStore(preferences)
 
     assertEquals(listOf("one@gmail.com"), store.getAccounts())
-    assertNull(preferences.legacyEmail)
+    assertNull(preferences.storedLegacyEmail)
     assertEquals(listOf("one@gmail.com"), store.getAccounts())
   }
 
   @Test
   fun keepsLegacyAccountWhenMigrationWriteFails() {
     val preferences =
-        FakeGmailAccountPreferences(legacyEmail = "one@gmail.com", writeSucceeds = false)
+        FakeGmailAccountPreferences(storedLegacyEmail = "one@gmail.com", writeSucceeds = false)
     val store = GmailAccountStore(preferences)
 
     assertEquals(listOf("one@gmail.com"), store.getAccounts())
-    assertEquals("one@gmail.com", preferences.legacyEmail)
+    assertEquals("one@gmail.com", preferences.storedLegacyEmail)
   }
 
   @Test
@@ -66,7 +66,7 @@ class GmailAccountStoreTest {
   fun reportsWhenAccountRemovalCannotBePersisted() {
     val preferences =
         FakeGmailAccountPreferences(
-            accountsJson = "[\"one@gmail.com\"]",
+            storedAccountsJson = "[\"one@gmail.com\"]",
             writeSucceeds = false,
         )
     val store = GmailAccountStore(preferences)
@@ -75,22 +75,22 @@ class GmailAccountStoreTest {
   }
 
   private class FakeGmailAccountPreferences(
-    var accountsJson: String? = null,
-    var legacyEmail: String? = null,
+    var storedAccountsJson: String? = null,
+    var storedLegacyEmail: String? = null,
     private val writeSucceeds: Boolean = true,
   ) : GmailAccountPreferences {
-    override fun getAccountsJson(): String? = accountsJson
+    override fun getAccountsJson(): String? = storedAccountsJson
 
     override fun setAccountsJson(value: String): Boolean {
       if (!writeSucceeds) return false
-      accountsJson = value
+      storedAccountsJson = value
       return true
     }
 
-    override fun getLegacyEmail(): String? = legacyEmail
+    override fun getLegacyEmail(): String? = storedLegacyEmail
 
     override fun removeLegacyEmail() {
-      legacyEmail = null
+      storedLegacyEmail = null
     }
   }
 }
