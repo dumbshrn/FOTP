@@ -27,6 +27,10 @@
   <string name="gmail_disconnect_failed">Could not disconnect Gmail authorization.</string>
   <string name="gmail_history_entry">Gmail OTP: %1$s</string>
   <string name="gmail_otp_title">Gmail OTP</string>
+  <string name="notifications">Notifications and copying</string>
+  <string name="advanced_settings">Detection behavior</string>
+  <string name="privacy">Privacy</string>
+  <string name="integrations">Integrations</string>
   <string name="gmail_fetch_help">Fetches OTPs on demand from your recent inbox using read-only access. Nothing is monitored in the background.</string>
   <string name="gmail_fetch_channel_name">Gmail OTP fetch</string>
   <string name="gmail_fetch_channel_description">Progress and results for manual Gmail OTP fetches</string>
@@ -211,4 +215,25 @@
   <string name="permissions_reminder_title">Check permissions</string>
   <string name="permissions_reminder_message">You changed the app mode. Please check the app permissions for this mode to ensure the app functions correctly.</string>
   <string name="take_me_there">Take me there</string>
+  <string name="codes">Codes</string>
+  <string name="codes_subtitle">Your latest one-time codes, all in one place.</string>
+  <string name="recent_codes">Recent codes</string>
+  <string name="latest_code">Latest code</string>
+  <string name="no_code_available">No code yet</string>
+  <string name="code_hidden_for_privacy">Hidden for privacy</string>
+  <string name="waiting_for_codes">Waiting for a new code</string>
+  <string name="no_codes_yet">No codes yet</string>
+  <string name="codes_empty_help">Enable a detection source or fetch your Gmail to see codes here.</string>
+  <string name="codes_history_disabled">History is off, so recent codes are not saved here. New codes can still be copied when detected.</string>
+  <string name="view_history">View history</string>
+  <string name="appearance">Appearance</string>
+  <string name="theme_mode">Theme</string>
+  <string name="theme_system">System</string>
+  <string name="theme_light">Light</string>
+  <string name="theme_dark">Dark</string>
+  <string name="color_palette">Color palette</string>
+  <string name="palette_material_you">Material You</string>
+  <string name="palette_vivi">Vivi-inspired</string>
+  <string name="palette_material_you_desc">Use colors from your wallpaper</string>
+  <string name="palette_vivi_desc">Use a dark plum and blush palette</string>
 </resources>

@@ -24,6 +24,8 @@ message UserSettings {
   string detection_test_content = 18;
   bool is_broadcast_code_enabled = 19;
   string broadcast_target_package_name = 20;
+  int32 theme_mode = 21;
+  int32 color_palette = 22;
 }
 
 enum ModeOfOperation {

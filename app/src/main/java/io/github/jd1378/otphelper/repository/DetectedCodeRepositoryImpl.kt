@@ -32,6 +32,9 @@ constructor(
         .flow
   }
 
+  override fun getLatest(limit: Int): Flow<List<DetectedCode>> =
+      otpHelperDatabase.detectedCodeDao().getLatest(limit)
+
   override fun getById(historyId: Long): Flow<DetectedCode?> {
     return otpHelperDatabase.detectedCodeDao().getById(historyId)
   }

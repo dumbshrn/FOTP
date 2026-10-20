@@ -10,6 +10,8 @@ interface DetectedCodeRepository {
 
   fun get(pageSize: Int = 8): Flow<PagingData<DetectedCode>>
 
+  fun getLatest(limit: Int): Flow<List<DetectedCode>>
+
   fun getById(historyId: Long): Flow<DetectedCode?>
 
   suspend fun deleteDetectedCode(detectedCode: DetectedCode)

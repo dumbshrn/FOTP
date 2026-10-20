@@ -5,6 +5,8 @@ import androidx.compose.runtime.Stable
 import androidx.datastore.core.DataStore
 import io.github.jd1378.otphelper.ModeOfOperation
 import io.github.jd1378.otphelper.UserSettings
+import io.github.jd1378.otphelper.ui.theme.AppColorPalette
+import io.github.jd1378.otphelper.ui.theme.AppThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
@@ -159,5 +161,13 @@ constructor(
     userSettingsStore.updateData { currentSettings ->
       currentSettings.toBuilder().setBroadcastTargetPackageName(value).build()
     }
+  }
+
+  override suspend fun setThemeMode(value: AppThemeMode) {
+    userSettingsStore.updateData { it.toBuilder().setThemeMode(value.storedValue).build() }
+  }
+
+  override suspend fun setColorPalette(value: AppColorPalette) {
+    userSettingsStore.updateData { it.toBuilder().setColorPalette(value.storedValue).build() }
   }
 }

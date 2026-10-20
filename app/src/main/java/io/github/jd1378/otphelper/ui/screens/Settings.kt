@@ -23,6 +23,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -60,6 +64,9 @@ import io.github.jd1378.otphelper.ui.components.SettingPageLink
 import io.github.jd1378.otphelper.ui.components.TitleBar
 import io.github.jd1378.otphelper.ui.navigation.MainDestinations
 import io.github.jd1378.otphelper.ui.theme.OtpHelperTheme
+import io.github.jd1378.otphelper.ui.theme.AppColorPalette
+import io.github.jd1378.otphelper.ui.theme.AppThemeMode
+import io.github.jd1378.otphelper.ui.components.SettingGroup
 import io.github.jd1378.otphelper.ui.utils.getCurrentLocale
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -109,10 +116,50 @@ fun Settings(
                 .verticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_sections)),
     ) {
-      Surface(
-          color = MaterialTheme.colorScheme.surfaceContainer,
-          shape = MaterialTheme.shapes.large,
-      ) {
+      SettingGroup(title = stringResource(R.string.appearance)) {
+        Text(stringResource(R.string.theme_mode), style = MaterialTheme.typography.titleSmall)
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+          AppThemeMode.entries.forEachIndexed { index, themeMode ->
+            val label =
+                when (themeMode) {
+                  AppThemeMode.SYSTEM -> stringResource(R.string.theme_system)
+                  AppThemeMode.LIGHT -> stringResource(R.string.theme_light)
+                  AppThemeMode.DARK -> stringResource(R.string.theme_dark)
+                }
+            SegmentedButton(
+                selected = userSettings.themeMode == themeMode.storedValue,
+                onClick = { viewModel.setThemeMode(themeMode) },
+                shape = SegmentedButtonDefaults.itemShape(index, AppThemeMode.entries.size),
+                label = { Text(label) },
+            )
+          }
+        }
+        Text(stringResource(R.string.color_palette), style = MaterialTheme.typography.titleSmall)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+          FilterChip(
+              selected = userSettings.colorPalette == AppColorPalette.MATERIAL_YOU.storedValue,
+              onClick = { viewModel.setColorPalette(AppColorPalette.MATERIAL_YOU) },
+              label = { Text(stringResource(R.string.palette_material_you)) },
+          )
+          FilterChip(
+              selected = userSettings.colorPalette == AppColorPalette.VIVI_INSPIRED.storedValue,
+              onClick = { viewModel.setColorPalette(AppColorPalette.VIVI_INSPIRED) },
+              label = { Text(stringResource(R.string.palette_vivi)) },
+          )
+        }
+        Text(
+            text =
+                stringResource(
+                    if (userSettings.colorPalette == AppColorPalette.MATERIAL_YOU.storedValue)
+                        R.string.palette_material_you_desc
+                    else R.string.palette_vivi_desc
+                ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+      }
+
+      SettingGroup(title = stringResource(R.string.gmail_otp_title)) {
         Column(
             modifier =
                 Modifier.padding(
@@ -121,10 +168,6 @@ fun Settings(
                 ),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_settings)),
         ) {
-          Text(
-              stringResource(R.string.gmail_otp_title),
-              style = MaterialTheme.typography.titleMedium,
-          )
           Text(stringResource(R.string.gmail_connected_accounts))
           if (connectedGmails.isEmpty()) {
             Text(stringResource(R.string.gmail_no_connected_accounts))
@@ -212,10 +255,7 @@ fun Settings(
           title = stringResource(R.string.detection_test),
       )
 
-      Surface(
-          color = MaterialTheme.colorScheme.surfaceContainer,
-          shape = MaterialTheme.shapes.large,
-      ) {
+      SettingGroup(title = stringResource(R.string.notifications)) {
         Column(
             verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_settings)),
             modifier =
@@ -328,10 +368,7 @@ fun Settings(
         }
       }
 
-      Surface(
-          color = MaterialTheme.colorScheme.surfaceContainer,
-          shape = MaterialTheme.shapes.large,
-      ) {
+      SettingGroup(title = stringResource(R.string.history)) {
         Column(
             verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_settings)),
             modifier =
@@ -382,10 +419,7 @@ fun Settings(
         }
       }
 
-      Surface(
-          color = MaterialTheme.colorScheme.surfaceContainer,
-          shape = MaterialTheme.shapes.large,
-      ) {
+      SettingGroup(title = stringResource(R.string.advanced_settings)) {
         Column(
             verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_settings)),
             modifier =
@@ -436,10 +470,7 @@ fun Settings(
         }
       }
 
-      Surface(
-          color = MaterialTheme.colorScheme.surfaceContainer,
-          shape = MaterialTheme.shapes.large,
-      ) {
+      SettingGroup(title = stringResource(R.string.privacy)) {
         Column(
             verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_settings)),
             modifier =
@@ -469,10 +500,7 @@ fun Settings(
         }
       }
 
-      Surface(
-          color = MaterialTheme.colorScheme.surfaceContainer,
-          shape = MaterialTheme.shapes.large,
-      ) {
+      SettingGroup(title = stringResource(R.string.integrations)) {
         Column(
             verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_settings)),
             modifier =

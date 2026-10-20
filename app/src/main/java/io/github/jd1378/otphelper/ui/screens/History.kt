@@ -53,6 +53,7 @@ import io.github.jd1378.otphelper.data.local.entity.DetectedCode
 import io.github.jd1378.otphelper.ui.components.AppImage
 import io.github.jd1378.otphelper.ui.components.DangerousActionDialog
 import io.github.jd1378.otphelper.ui.components.TitleBar
+import io.github.jd1378.otphelper.ui.components.SettingGroup
 import io.github.jd1378.otphelper.ui.components.drawVerticalScrollbar
 import io.github.jd1378.otphelper.ui.components.getAppInfo
 import io.github.jd1378.otphelper.ui.navigation.MainDestinations
@@ -110,7 +111,8 @@ fun History(
       Text(
           stringResource(R.string.history_desc),
           modifier = Modifier.fillMaxWidth(),
-          fontSize = 15.sp)
+          style = MaterialTheme.typography.bodyLarge,
+          color = MaterialTheme.colorScheme.onSurfaceVariant)
 
       HorizontalDivider(Modifier.padding(top = dimensionResource(R.dimen.padding_page)))
 
@@ -134,13 +136,17 @@ fun History(
               }
           else -> {
             if (historyItems.itemCount == 0) {
-              Row {
+              Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                SettingGroup(
+                    title = stringResource(R.string.history),
+                    modifier = Modifier.padding(24.dp),
+                ) {
                 Text(
                     stringResource(R.string.list_is_empty),
-                    modifier = Modifier.fillMaxSize(),
-                    fontSize = 24.sp,
-                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                }
               }
             } else {
               LazyColumn(

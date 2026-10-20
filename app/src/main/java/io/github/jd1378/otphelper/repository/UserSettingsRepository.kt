@@ -3,6 +3,8 @@ package io.github.jd1378.otphelper.repository
 import androidx.compose.runtime.Stable
 import io.github.jd1378.otphelper.ModeOfOperation
 import io.github.jd1378.otphelper.UserSettings
+import io.github.jd1378.otphelper.ui.theme.AppColorPalette
+import io.github.jd1378.otphelper.ui.theme.AppThemeMode
 import kotlinx.coroutines.flow.Flow
 
 @Stable
@@ -53,4 +55,8 @@ interface UserSettingsRepository {
   suspend fun setIsBroadcastCodeEnabled(value: Boolean)
 
   suspend fun setBroadcastTargetPackageName(value: String)
+
+  suspend fun setThemeMode(value: AppThemeMode)
+
+  suspend fun setColorPalette(value: AppColorPalette)
 }

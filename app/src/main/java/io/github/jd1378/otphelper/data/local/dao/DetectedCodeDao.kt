@@ -14,6 +14,9 @@ abstract class DetectedCodeDao : BaseDao<DetectedCode> {
   @Query("SELECT * FROM DetectedCode ORDER BY createdAt DESC")
   abstract fun detectedCodeSortedByCreatedAtPagingSource(): PagingSource<Int, DetectedCode>
 
+  @Query("SELECT * FROM DetectedCode ORDER BY createdAt DESC LIMIT :limit")
+  abstract fun getLatest(limit: Int): Flow<List<DetectedCode>>
+
   @Query("SELECT * FROM DetectedCode WHERE id = :id ORDER BY createdAt DESC")
   abstract fun getById(id: Long): Flow<DetectedCode?>
 

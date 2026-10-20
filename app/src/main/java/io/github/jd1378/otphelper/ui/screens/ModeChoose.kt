@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -110,11 +111,13 @@ fun ModeChoose(
         )
       }
       Surface(
-          color = MaterialTheme.colorScheme.surfaceContainer,
-          shape = MaterialTheme.shapes.large,
+          color = if (userSettings.modeOfOperation == ModeOfOperation.Notification)
+              MaterialTheme.colorScheme.secondaryContainer
+          else MaterialTheme.colorScheme.surfaceContainer,
+          shape = MaterialTheme.shapes.extraLarge,
           onClick = { viewModel.onModeSelected(context, ModeOfOperation.Notification) },
       ) {
-        Row {
+        Row(Modifier.fillMaxWidth().padding(12.dp)) {
           RadioButton(
               selected = userSettings.modeOfOperation == ModeOfOperation.Notification,
               onClick = { viewModel.onModeSelected(context, ModeOfOperation.Notification) },
@@ -123,6 +126,9 @@ fun ModeChoose(
             Text(
                 text = stringResource(R.string.Notification),
                 fontSize = 20.sp,
+                color = if (userSettings.modeOfOperation == ModeOfOperation.Notification)
+                    MaterialTheme.colorScheme.onSecondaryContainer
+                else MaterialTheme.colorScheme.onSurface,
             )
             Text(
                 text = stringResource(
@@ -130,19 +136,24 @@ fun ModeChoose(
                 ),
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Justify,
+                color = if (userSettings.modeOfOperation == ModeOfOperation.Notification)
+                    MaterialTheme.colorScheme.onSecondaryContainer
+                else MaterialTheme.colorScheme.onSurfaceVariant,
             )
           }
         }
       }
 
       Surface(
-          color = if (smsEnabled) MaterialTheme.colorScheme.surfaceContainer
+          color = if (userSettings.modeOfOperation == ModeOfOperation.SMS)
+              MaterialTheme.colorScheme.secondaryContainer
+          else if (smsEnabled) MaterialTheme.colorScheme.surfaceContainer
           else MaterialTheme.colorScheme.surfaceContainerLow,
-          shape = MaterialTheme.shapes.large,
+          shape = MaterialTheme.shapes.extraLarge,
           onClick = { if (smsEnabled) viewModel.onModeSelected(context, ModeOfOperation.SMS) },
           enabled = smsEnabled,
       ) {
-        Row {
+        Row(Modifier.fillMaxWidth().padding(12.dp)) {
           RadioButton(
               selected = userSettings.modeOfOperation == ModeOfOperation.SMS,
               onClick = { if (smsEnabled) viewModel.onModeSelected(context, ModeOfOperation.SMS) },
@@ -152,15 +163,21 @@ fun ModeChoose(
             Text(
                 text = stringResource(R.string.sms),
                 style = MaterialTheme.typography.titleMedium,
-                color = if (smsEnabled) MaterialTheme.colorScheme.onSurface
-                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                color = when {
+                  !smsEnabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                  userSettings.modeOfOperation == ModeOfOperation.SMS ->
+                      MaterialTheme.colorScheme.onSecondaryContainer
+                  else -> MaterialTheme.colorScheme.onSurface
+                },
             )
             Text(
                 text = stringResource(R.string.sms_mode_help),
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Justify,
-                color = if (smsEnabled) MaterialTheme.colorScheme.onSurface
-                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                color = if (!smsEnabled) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                else if (userSettings.modeOfOperation == ModeOfOperation.SMS)
+                    MaterialTheme.colorScheme.onSecondaryContainer
+                else MaterialTheme.colorScheme.onSurfaceVariant,
             )
           }
         }

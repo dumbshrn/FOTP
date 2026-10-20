@@ -17,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -217,7 +218,10 @@ fun HistoryDetail(
 
         val customColors = LocalCustomColors.current
 
-        Column() {
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            shape = MaterialTheme.shapes.extraLarge,
+        ) {
           SelectionContainer {
             Text(
                 buildAnnotatedString {
@@ -244,6 +248,8 @@ fun HistoryDetail(
                         end = codeGroupRange.last + 1)
                   }
                 },
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.fillMaxWidth().padding(20.dp),
             )
           }
         }

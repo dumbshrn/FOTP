@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
       }
     }
 
-    setContent { OtpHelperApp(deepLinkHandler) }
+    setContent { OtpHelperApp(deepLinkHandler, userSettingsRepository) }
   }
 
   override fun onNewIntent(intent: Intent) {

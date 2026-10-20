@@ -10,6 +10,8 @@ import io.github.jd1378.otphelper.MyWorkManager.disableHistoryCleanup
 import io.github.jd1378.otphelper.MyWorkManager.enableHistoryCleanup
 import io.github.jd1378.otphelper.UserSettings
 import io.github.jd1378.otphelper.repository.UserSettingsRepository
+import io.github.jd1378.otphelper.ui.theme.AppColorPalette
+import io.github.jd1378.otphelper.ui.theme.AppThemeMode
 import io.github.jd1378.otphelper.utils.NotificationHelper
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -121,6 +123,14 @@ constructor(
     viewModelScope.launch {
       userSettingsRepository.setIsBroadcastCodeEnabled(!userSettings.value.isBroadcastCodeEnabled)
     }
+  }
+
+  fun setThemeMode(mode: AppThemeMode) {
+    viewModelScope.launch { userSettingsRepository.setThemeMode(mode) }
+  }
+
+  fun setColorPalette(palette: AppColorPalette) {
+    viewModelScope.launch { userSettingsRepository.setColorPalette(palette) }
   }
 
   suspend fun getBroadcastTargetPackageName(): String {
