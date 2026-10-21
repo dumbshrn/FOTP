@@ -186,8 +186,12 @@ fun OtpHelperTheme(
       val window = (view.context as Activity).window
 
       window.statusBarColor = resolvedColorScheme.background.toArgb()
+      window.navigationBarColor = resolvedColorScheme.background.toArgb()
       window.decorView.setBackgroundColor(resolvedColorScheme.background.toArgb())
-      WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+      WindowCompat.getInsetsController(window, view).apply {
+        isAppearanceLightStatusBars = !darkTheme
+        isAppearanceLightNavigationBars = !darkTheme
+      }
     }
   }
 
