@@ -32,6 +32,17 @@
   <string name="privacy">Privacy</string>
   <string name="integrations">Integrations</string>
   <string name="gmail_fetch_help">Fetches OTPs on demand from your recent inbox using read-only access. Nothing is monitored in the background.</string>
+  <string name="appearance_summary">Theme mode and accent colors</string>
+  <string name="gmail_settings_summary">Manage accounts and fetch one-time codes</string>
+  <string name="content_settings_summary">Language, phrase filters, and detection tools</string>
+  <string name="notifications_settings_summary">Control copying and notification behavior</string>
+  <string name="history_settings_summary">Manage saved codes and history privacy</string>
+  <string name="advanced_settings_summary">Experimental detection behavior</string>
+  <string name="privacy_settings_summary">Protect sensitive codes and clipboard contents</string>
+  <string name="integrations_settings_summary">Connect detected codes to other apps</string>
+  <string name="theme_and_colors">Theme &amp; Colors</string>
+  <string name="pure_black_mode">Pure black mode</string>
+  <string name="enable_dynamic_theme">Enable dynamic theme</string>
   <string name="gmail_fetch_channel_name">Gmail OTP fetch</string>
   <string name="gmail_fetch_channel_description">Progress and results for manual Gmail OTP fetches</string>
   <string name="gmail_fetch_channel_id" translatable="false">gmail_fetch_status</string>

@@ -97,8 +97,7 @@ fun History(
   ) { padding ->
     Column(
         Modifier.padding(padding)
-            .padding(horizontal = dimensionResource(R.dimen.padding_page))
-            .padding(top = dimensionResource(R.dimen.padding_page)),
+            .padding(horizontal = dimensionResource(R.dimen.padding_page)),
     ) {
       if (showClearHistoryDialog.value) {
         DangerousActionDialog(
