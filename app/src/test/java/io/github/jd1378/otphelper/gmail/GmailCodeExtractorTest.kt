@@ -32,4 +32,27 @@ class GmailCodeExtractorTest {
 
     assertEquals("483921", GmailCodeExtractor().extract(message))
   }
+
+  @Test
+  fun extractsOtpWhenLabelAndCodeAreOnSeparateLines() {
+    val message = "Your verification code is:\n483921\nDo not share this code."
+
+    assertEquals("483921", GmailCodeExtractor().extract(message))
+  }
+
+  @Test
+  fun ignoresCodesInTransitTicketMetadata() {
+    val message =
+        """
+        PNR: 12345678, Ticket No: 1234567
+        Boarding QR Code
+        qr_img
+        Bus Type:
+        Super Fast
+        Trip Code:
+        ABCD1234
+        """.trimIndent()
+
+    assertEquals(null, GmailCodeExtractor().extract(message))
+  }
 }
