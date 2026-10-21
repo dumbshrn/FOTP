@@ -133,6 +133,10 @@ constructor(
     viewModelScope.launch { userSettingsRepository.setColorPalette(palette) }
   }
 
+  fun setUseFloatingNavigationBar(enabled: Boolean) {
+    viewModelScope.launch { userSettingsRepository.setUseFloatingNavigationBar(enabled) }
+  }
+
   suspend fun getBroadcastTargetPackageName(): String {
     return userSettingsRepository.fetchSettings().broadcastTargetPackageName
   }

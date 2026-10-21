@@ -62,8 +62,12 @@ fun OtpHelperApp(
                   MainDestinations.HISTORY_ROUTE,
                   MainDestinations.SETTINGS_ROUTE,
               )) {
-            AppNavigationBar(currentRoute) { route ->
-              theNavController.navigateToRoute(route, popToStart = true)
+            AppNavigationBar(currentRoute, userSettings.useFloatingNavigationBar) { route ->
+              if (route == MainDestinations.HOME_ROUTE) {
+                theNavController.navigateToHome()
+              } else {
+                theNavController.navigateToRoute(route, popToStart = true)
+              }
             }
           }
         },

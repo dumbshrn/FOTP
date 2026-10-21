@@ -247,6 +247,7 @@
   <string name="codes_history_disabled">History is off, so recent codes are not saved here. New codes can still be copied when detected.</string>
   <string name="view_history">View history</string>
   <string name="appearance">Appearance</string>
+  <string name="floating_navigation_bar">Floating navigation bar</string>
   <string name="theme_mode">Theme</string>
   <string name="theme_system">System</string>
   <string name="theme_light">Light</string>

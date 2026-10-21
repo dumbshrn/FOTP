@@ -83,6 +83,7 @@ dependencies {
   androidTestImplementation("androidx.test.ext:junit:1.3.0")
   androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
   androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+  androidTestImplementation("androidx.navigation:navigation-testing:2.9.5")
   debugImplementation("androidx.compose.ui:ui-tooling")
   debugImplementation("androidx.compose.ui:ui-test-manifest")
   // debugImplementation because LeakCanary should only run in debug builds.

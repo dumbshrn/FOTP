@@ -170,4 +170,8 @@ constructor(
   override suspend fun setColorPalette(value: AppColorPalette) {
     userSettingsStore.updateData { it.toBuilder().setColorPalette(value.storedValue).build() }
   }
+
+  override suspend fun setUseFloatingNavigationBar(value: Boolean) {
+    userSettingsStore.updateData { it.toBuilder().setUseFloatingNavigationBar(value).build() }
+  }
 }

@@ -235,6 +235,13 @@ fun Settings(
             },
             iconRes = R.drawable.ic_dynamic_color_24,
         )
+        HorizontalDivider()
+        ThemeToggleRow(
+            title = stringResource(R.string.floating_navigation_bar),
+            checked = userSettings.useFloatingNavigationBar,
+            onCheckedChange = viewModel::setUseFloatingNavigationBar,
+            iconRes = R.drawable.ic_navigation_24,
+        )
       }
       }
 

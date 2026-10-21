@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="610" viewBox="0 0 1200 610" role="img" aria-labelledby="title desc">
+  <title id="title">FOTP Gmail setup at a glance</title>
+  <desc id="desc">The maintainer configures and verifies OAuth once. Testers are listed during testing. Once approved, users install FOTP, connect Gmail, and fetch a code on demand.</desc>
+  <rect width="1200" height="610" rx="32" fill="#111318"/>
+  <text x="56" y="76" fill="#f4eff7" font-family="Arial, sans-serif" font-size="34" font-weight="700">Gmail OTP: setup once, then fetch when needed</text>
+  <text x="56" y="119" fill="#c4c6d0" font-family="Arial, sans-serif" font-size="21">Only the maintainer configures Google OAuth. App users do not need a Cloud project.</text>
+  <rect x="56" y="160" width="1088" height="245" rx="24" fill="#202127" stroke="#454750" stroke-width="2"/>
+  <text x="88" y="203" fill="#ffb1c8" font-family="Arial, sans-serif" font-size="20" font-weight="700">MAINTAINER · ONE-TIME SETUP</text>
+  <g font-family="Arial, sans-serif" text-anchor="middle">
+    <rect x="88" y="229" width="225" height="126" rx="18" fill="#30313a"/>
+    <text x="200" y="276" fill="#f4eff7" font-size="20" font-weight="700">Enable Gmail API</text>
+    <text x="200" y="310" fill="#c4c6d0" font-size="17">Google Cloud project</text>
+    <path d="M324 292h44m-14-14 14 14-14 14" fill="none" stroke="#ffb1c8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="382" y="229" width="225" height="126" rx="18" fill="#30313a"/>
+    <text x="494" y="276" fill="#f4eff7" font-size="20" font-weight="700">Set OAuth scope</text>
+    <text x="494" y="310" fill="#c4c6d0" font-size="17">gmail.readonly</text>
+    <path d="M618 292h44m-14-14 14 14-14 14" fill="none" stroke="#ffb1c8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="676" y="229" width="225" height="126" rx="18" fill="#30313a"/>
+    <text x="788" y="276" fill="#f4eff7" font-size="20" font-weight="700">Android client</text>
+    <text x="788" y="310" fill="#c4c6d0" font-size="17">package + release SHA-1</text>
+    <path d="M912 292h44m-14-14 14 14-14 14" fill="none" stroke="#ffb1c8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="970" y="229" width="142" height="126" rx="18" fill="#30313a"/>
+    <text x="1041" y="276" fill="#f4eff7" font-size="20" font-weight="700">Verify</text>
+    <text x="1041" y="310" fill="#c4c6d0" font-size="17">for public use</text>
+  </g>
+  <rect x="56" y="433" width="1088" height="128" rx="24" fill="#293d35" stroke="#517261" stroke-width="2"/>
+  <text x="88" y="476" fill="#b7f0d0" font-family="Arial, sans-serif" font-size="20" font-weight="700">FOTP USER · SIMPLE FLOW AFTER APPROVAL</text>
+  <g font-family="Arial, sans-serif" text-anchor="middle">
+    <text x="270" y="526" fill="#f4eff7" font-size="21" font-weight="700">Install release</text>
+    <path d="M401 516h68m-14-14 14 14-14 14" fill="none" stroke="#b7f0d0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="617" y="526" fill="#f4eff7" font-size="21" font-weight="700">Connect Gmail</text>
+    <path d="M741 516h68m-14-14 14 14-14 14" fill="none" stroke="#b7f0d0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="957" y="526" fill="#f4eff7" font-size="21" font-weight="700">Fetch on demand</text>
+  </g>
+</svg>

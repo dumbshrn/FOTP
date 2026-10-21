@@ -49,6 +49,25 @@ jobs:
         # found inside pulled layers detail of cimg/android inside docker hub after "/bin/bash -exo pipefail -c SDK_TOOLS_URL..."
         BUILD_TOOLS_VERSION: "33.0.1" 
 
+    - name: Report release APK OAuth identity
+      if: ${{ github.event_name == 'release' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        apk=$(find app/build/outputs/apk/normal/release -name '*signed.apk' -print -quit)
+        test -n "$apk"
+        build_tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
+        application_id=$($build_tools/aapt dump badging "$apk" | sed -n "s/^package: name='\\([^']*\\)'.*/\\1/p")
+        sha1=$($build_tools/apksigner verify --print-certs "$apk" | sed -n 's/.*certificate SHA-1 digest: //p' | head -n 1 | tr '[:lower:]' '[:upper:]')
+        test "$application_id" = "com.dumbshrn.otphelper"
+        test -n "$sha1"
+        formatted_sha1=$(echo "$sha1" | sed 's/../&:/g; s/:$//')
+        {
+          echo "### Release APK OAuth identity"
+          printf -- '- Application ID: `%s`\n' "$application_id"
+          printf -- '- APK signer SHA-1: `%s`\n' "$formatted_sha1"
+        } >> "$GITHUB_STEP_SUMMARY"
+
     - name: Sign App Bundle
       if: ${{ github.event_name == 'release' }}
       uses: r0adkll/sign-android-release@v1

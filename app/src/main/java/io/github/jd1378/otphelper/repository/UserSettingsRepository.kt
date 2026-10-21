@@ -59,4 +59,6 @@ interface UserSettingsRepository {
   suspend fun setThemeMode(value: AppThemeMode)
 
   suspend fun setColorPalette(value: AppColorPalette)
+
+  suspend fun setUseFloatingNavigationBar(value: Boolean)
 }

@@ -69,6 +69,13 @@ class TheNavController(
     navController.navigateUp()
   }
 
+  fun navigateToHome() {
+    if (!navController.popBackStack(MainDestinations.HOME_ROUTE, inclusive = false) &&
+        currentRoute != MainDestinations.HOME_ROUTE) {
+      navController.navigate(MainDestinations.HOME_ROUTE) { launchSingleTop = true }
+    }
+  }
+
   fun navigateToRoute(route: String, popToStart: Boolean = false, save_state: Boolean = true) {
     if (route != currentRoute) {
       navController.navigate(route) {

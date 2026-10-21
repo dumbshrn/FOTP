@@ -71,8 +71,8 @@ jobs:
           formatted_sha1=$(echo "$sha1" | sed 's/../&:/g; s/:$//')
           {
             echo "### Test APK OAuth identity"
-            echo "- Application ID: `$application_id`"
-            echo "- Debug signer SHA-1: `$formatted_sha1`"
+            printf -- '- Application ID: `%s`\n' "$application_id"
+            printf -- '- Debug signer SHA-1: `%s`\n' "$formatted_sha1"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check release signing secrets
@@ -129,6 +129,6 @@ jobs:
           formatted_sha1=$(echo "$sha1" | sed 's/../&:/g; s/:$//')
           {
             echo "### Release APK OAuth identity"
-            echo "- Application ID: `$application_id`"
-            echo "- APK signer SHA-1: `$formatted_sha1`"
+            printf -- '- Application ID: `%s`\n' "$application_id"
+            printf -- '- APK signer SHA-1: `%s`\n' "$formatted_sha1"
           } >> "$GITHUB_STEP_SUMMARY"

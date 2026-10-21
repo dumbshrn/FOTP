@@ -106,4 +106,8 @@ class UserSettingsRepositoryMock : UserSettingsRepository {
   override suspend fun setColorPalette(value: AppColorPalette) {
     TODO("Not yet implemented")
   }
+
+  override suspend fun setUseFloatingNavigationBar(value: Boolean) {
+    TODO("Not yet implemented")
+  }
 }
