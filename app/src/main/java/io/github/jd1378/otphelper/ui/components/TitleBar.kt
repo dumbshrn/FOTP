@@ -1,5 +1,6 @@
 package io.github.jd1378.otphelper.ui.components
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -42,6 +43,7 @@ fun TitleBar(
 
   TopAppBar(
       scrollBehavior = scrollBehavior,
+      windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp),
       colors =
           TopAppBarDefaults.topAppBarColors(
               scrolledContainerColor = MaterialTheme.colorScheme.surface),
