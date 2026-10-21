@@ -9,6 +9,10 @@
       android:name="android.permission.ACCESS_NETWORK_STATE"
       tools:node="remove" />
 
+  <queries>
+    <package android:name="com.google.android.gm" />
+  </queries>
+
   <permission
       android:name="${applicationId}.permission.BROADCAST_CODE"
       android:protectionLevel="signature" />

@@ -6,3 +6,6 @@ internal fun detectedCodeSourceLabel(notificationTag: String, smsOrigin: String,
       smsOrigin.isNotBlank() -> smsOrigin
       else -> appLabel
     }
+
+internal fun detectedCodeIconPackageName(notificationTag: String, packageName: String?): String? =
+    if (notificationTag == "gmail") "com.google.android.gm" else packageName

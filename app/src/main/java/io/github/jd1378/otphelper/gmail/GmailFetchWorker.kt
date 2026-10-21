@@ -159,7 +159,7 @@ constructor(
   }
 
   companion object {
-    private const val UNIQUE_WORK_NAME = "gmail-otp-fetch"
+    const val UNIQUE_WORK_NAME = "gmail-otp-fetch"
     private const val GOOGLE_ACCOUNT_TYPE = "com.google"
     private const val MAX_CONCURRENT_ACCOUNTS = 4
     private const val MAX_CONCURRENT_MESSAGE_REQUESTS = 8

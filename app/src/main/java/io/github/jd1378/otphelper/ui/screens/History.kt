@@ -75,6 +75,7 @@ fun History(
         TitleBar(
             upPress = upPress,
             text = stringResource(R.string.history),
+            showBackBtn = false,
         ) {
           var expanded by remember { mutableStateOf(false) }
 
@@ -181,7 +182,8 @@ fun History(
 @Composable
 fun DetectedCodeListItem(modifier: Modifier = Modifier, detectedCode: DetectedCode) {
   val context = LocalContext.current
-  val appInfo = remember(detectedCode.packageName) { getAppInfo(context, detectedCode.packageName) }
+  val iconPackage = detectedCodeIconPackageName(detectedCode.notificationTag, detectedCode.packageName)
+  val appInfo = remember(iconPackage) { getAppInfo(context, iconPackage) }
 
   ListItem(
       modifier = Modifier.clip(MaterialTheme.shapes.large).then(modifier),

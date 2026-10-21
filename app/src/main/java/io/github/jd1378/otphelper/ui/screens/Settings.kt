@@ -135,6 +135,7 @@ fun Settings(
       topBar = {
         TitleBar(
             upPress = { if (activeSection == null) upPress() else activeSection = null },
+            showBackBtn = activeSection != null,
             text =
                 stringResource(
                     if (activeSection == SettingsSection.APPEARANCE) R.string.theme_and_colors

@@ -3,6 +3,7 @@
   <string name="gmail_connect">Connect Gmail</string>
   <string name="gmail_add_account">Add Gmail account</string>
   <string name="gmail_fetch_otp">Fetch OTP from Gmail</string>
+  <string name="gmail_fetching_otp">Fetching OTP…</string>
   <string name="gmail_disconnect">Disconnect Gmail</string>
   <string name="gmail_connected_accounts">Signed-in Gmail accounts</string>
   <string name="gmail_no_connected_accounts">No Gmail accounts connected yet.</string>

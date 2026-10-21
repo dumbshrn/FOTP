@@ -1,12 +1,20 @@
 package io.github.jd1378.otphelper.ui.screens
 
 import android.text.format.DateUtils
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +23,7 @@ import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,15 +44,19 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.work.WorkManager
+import androidx.work.getWorkInfosForUniqueWorkFlow
 import io.github.jd1378.otphelper.R
 import io.github.jd1378.otphelper.data.local.entity.DetectedCode
 import io.github.jd1378.otphelper.di.LatestOtp
+import io.github.jd1378.otphelper.gmail.GmailFetchWorker
 import io.github.jd1378.otphelper.ui.components.SettingGroup
 import io.github.jd1378.otphelper.ui.components.getAppInfo
 import io.github.jd1378.otphelper.ui.navigation.MainDestinations
 import io.github.jd1378.otphelper.utils.Clipboard
 import io.github.jd1378.otphelper.utils.CodeExtractor
 import java.util.Date
+import kotlinx.coroutines.flow.map
 
 @Composable
 fun Home(
@@ -56,6 +69,12 @@ fun Home(
   val latestOtpCode by viewModel.latestOtpCode.collectAsStateWithLifecycle()
   var isCodeVisible by remember { mutableStateOf(true) }
   val context = LocalContext.current
+  val isGmailFetchInProgress by
+      remember(context) {
+        WorkManager.getInstance(context)
+            .getWorkInfosForUniqueWorkFlow(GmailFetchWorker.UNIQUE_WORK_NAME)
+            .map { workInfos -> isGmailFetchActive(workInfos.map { it.state }) }
+      }.collectAsStateWithLifecycle(initialValue = false)
   val codeExtractor =
       remember(userSettings.sensitivePhrasesList, userSettings.ignoredPhrasesList, userSettings.cleanupPhrasesList) {
         CodeExtractor(
@@ -124,9 +143,35 @@ fun Home(
           onClick = { viewModel.fetchGmail(context) },
           modifier = Modifier.fillMaxWidth(),
           shape = RoundedCornerShape(24.dp),
+          enabled = !isGmailFetchInProgress,
       ) {
-        Icon(Icons.Outlined.Email, contentDescription = null)
-        Text(stringResource(R.string.gmail_fetch_otp), modifier = Modifier.padding(start = 8.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          AnimatedContent(
+              targetState = isGmailFetchInProgress,
+              transitionSpec = {
+                (fadeIn(tween(180)) + scaleIn(initialScale = 0.8f, animationSpec = tween(180)))
+                    .togetherWith(fadeOut(tween(120)))
+              },
+              label = "gmail-fetch-indicator",
+          ) { isLoading ->
+            if (isLoading) {
+              CircularProgressIndicator(
+                  modifier = Modifier.size(20.dp),
+                  strokeWidth = 2.dp,
+                  color = MaterialTheme.colorScheme.onPrimary,
+              )
+            } else {
+              Icon(Icons.Outlined.Email, contentDescription = null)
+            }
+          }
+          Text(
+              stringResource(
+                  if (isGmailFetchInProgress) R.string.gmail_fetching_otp
+                  else R.string.gmail_fetch_otp
+              ),
+              modifier = Modifier.padding(start = 8.dp),
+          )
+        }
       }
     }
 
@@ -196,7 +241,7 @@ private fun LatestCodeCard(
       }
   val timestamp = latestOtp?.let { Date(it.capturedAtMillis) } ?: detectedCode?.createdAt
   Card(
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier.fillMaxWidth().animateContentSize(),
       shape = RoundedCornerShape(32.dp),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
   ) {
@@ -229,19 +274,28 @@ private fun LatestCodeCard(
           }
         }
       }
-      Text(
-          text =
+      AnimatedContent(
+          targetState =
               when {
                 code != null && isCodeVisible -> code
                 code != null -> "••••••"
                 detectedCode == null -> stringResource(R.string.no_code_available)
                 else -> stringResource(R.string.no_current_code)
               },
-          style = MaterialTheme.typography.displaySmall,
-          fontFamily = FontFamily.Monospace,
-          fontWeight = FontWeight.Bold,
-          color = MaterialTheme.colorScheme.onPrimaryContainer,
-      )
+          transitionSpec = {
+            (fadeIn(tween(220)) + scaleIn(initialScale = 0.96f, animationSpec = tween(220)))
+                .togetherWith(fadeOut(tween(120)))
+          },
+          label = "latest-code-content",
+      ) { displayCode ->
+        Text(
+            text = displayCode,
+            style = MaterialTheme.typography.displaySmall,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
+      }
       Text(
           text =
               if (timestamp != null) {

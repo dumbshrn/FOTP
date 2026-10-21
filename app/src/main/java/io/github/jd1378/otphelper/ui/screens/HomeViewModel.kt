@@ -5,6 +5,7 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jd1378.otphelper.UserSettings
 import io.github.jd1378.otphelper.copy
@@ -17,6 +18,9 @@ import io.github.jd1378.otphelper.utils.NotificationHelper
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
+
+internal fun isGmailFetchActive(states: Iterable<WorkInfo.State>): Boolean =
+    states.any { it == WorkInfo.State.ENQUEUED || it == WorkInfo.State.BLOCKED || it == WorkInfo.State.RUNNING }
 
 @Stable
 @HiltViewModel
