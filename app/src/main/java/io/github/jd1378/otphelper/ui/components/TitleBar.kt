@@ -2,7 +2,6 @@ package io.github.jd1378.otphelper.ui.components
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,7 +23,7 @@ private fun Up(upPress: () -> Unit) {
   IconButton(
       onClick = upPress,
       modifier =
-          Modifier.statusBarsPadding().padding(horizontal = 16.dp, vertical = 10.dp).size(36.dp)) {
+          Modifier.padding(horizontal = 16.dp, vertical = 10.dp).size(36.dp)) {
         Icon(
             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
             contentDescription = stringResource(R.string.label_back))

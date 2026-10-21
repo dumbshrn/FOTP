@@ -14,6 +14,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "OtpHelper"
+rootProject.name = "FOTP"
 
 include(":app")

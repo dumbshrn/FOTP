@@ -1,6 +1,7 @@
 package io.github.jd1378.otphelper.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -55,9 +56,12 @@ fun About(upPress: () -> Unit) {
               horizontalAlignment = Alignment.CenterHorizontally,
           ) {
             Image(
-                painter = painterResource(R.drawable.logo_round),
+                painter = painterResource(R.drawable.fotp_logo_foreground),
                 contentDescription = null,
-                modifier = Modifier.size(128.dp).shadow(3.dp, shape = CircleShape),
+                modifier =
+                    Modifier.size(128.dp)
+                        .shadow(3.dp, shape = CircleShape)
+                        .background(androidx.compose.ui.graphics.Color.White, CircleShape),
             )
 
             Text(
@@ -101,7 +105,7 @@ fun About(upPress: () -> Unit) {
                             LinkTextData(
                                 text = stringResource(R.string.github),
                                 tag = "github_homepage",
-                                annotation = "https://github.com/jd1378/otphelper",
+                                annotation = "https://github.com/dumbshrn/otphelper",
                                 onClick = { uriHandler.openUriSafely(context, it.item) },
                             ),
                         ),

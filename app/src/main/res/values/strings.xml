@@ -1,5 +1,5 @@
 <resources>
-  <string name="app_name">OTP Helper</string>
+  <string name="app_name">FOTP</string>
   <string name="gmail_connect">Connect Gmail</string>
   <string name="gmail_add_account">Add Gmail account</string>
   <string name="gmail_fetch_otp">Fetch OTP from Gmail</string>
@@ -235,8 +235,10 @@
   <string name="show_code">Show code</string>
   <string name="no_current_code">No code captured since opening the app</string>
   <string name="setup_and_access">Setup &amp; access</string>
+  <string name="settings_personalization">Personalization</string>
+  <string name="settings_app_behavior">App behavior</string>
   <string name="settings_mode_help">Choose how OTPs are detected</string>
-  <string name="settings_permissions_help">Review the access OTP Helper needs</string>
+  <string name="settings_permissions_help">Review the access FOTP needs</string>
   <string name="content_and_detection">Content &amp; detection</string>
   <string name="waiting_for_codes">Waiting for a new code</string>
   <string name="no_codes_yet">No codes yet</string>

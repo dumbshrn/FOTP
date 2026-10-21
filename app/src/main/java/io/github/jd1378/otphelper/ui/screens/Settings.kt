@@ -152,32 +152,36 @@ fun Settings(
         verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_sections)),
     ) {
       if (activeSection == null) {
-      SettingGroup(title = stringResource(R.string.setup_and_access)) {
-        SettingsNavigationRow(
-            title = stringResource(R.string.MODE_ROUTE),
-            subtitle = stringResource(R.string.settings_mode_help),
-            iconRes = R.drawable.ic_tune_24,
-            onClick = { onNavigateToRoute(MainDestinations.MODE_ROUTE, false, true) },
-        )
-        HorizontalDivider()
-        SettingsNavigationRow(
-            title = stringResource(R.string.PERMISSION_ROUTE),
-            subtitle = stringResource(R.string.settings_permissions_help),
-            iconRes = R.drawable.ic_security_24,
-            onClick = { onNavigateToRoute(MainDestinations.PERMISSIONS_ROUTE, false, true) },
-        )
-      }
-
-      SettingsSection.entries.forEach { section ->
-        SettingGroup(title = stringResource(section.titleRes)) {
+        SettingGroup(title = stringResource(R.string.setup_and_access)) {
           SettingsNavigationRow(
-              title = stringResource(R.string.open_settings),
-              subtitle = stringResource(section.summaryRes),
-              iconRes = section.iconRes,
-              onClick = { activeSection = section },
+              title = stringResource(R.string.MODE_ROUTE),
+              subtitle = stringResource(R.string.settings_mode_help),
+              iconRes = R.drawable.ic_tune_24,
+              onClick = { onNavigateToRoute(MainDestinations.MODE_ROUTE, false, true) },
+          )
+          HorizontalDivider()
+          SettingsNavigationRow(
+              title = stringResource(R.string.PERMISSION_ROUTE),
+              subtitle = stringResource(R.string.settings_permissions_help),
+              iconRes = R.drawable.ic_security_24,
+              onClick = { onNavigateToRoute(MainDestinations.PERMISSIONS_ROUTE, false, true) },
           )
         }
-      }
+
+        SettingsSectionGroup(
+            title = stringResource(R.string.settings_personalization),
+            sections =
+                SettingsSection.entries.filter {
+                  it.category == SettingsCategory.PERSONALIZATION
+                },
+            onSectionSelected = { activeSection = it },
+        )
+        SettingsSectionGroup(
+            title = stringResource(R.string.settings_app_behavior),
+            sections =
+                SettingsSection.entries.filter { it.category == SettingsCategory.APP_BEHAVIOR },
+            onSectionSelected = { activeSection = it },
+        )
       }
 
       if (activeSection == SettingsSection.APPEARANCE) {
@@ -669,19 +673,89 @@ private fun SettingsNavigationRow(
       headlineContent = { Text(title) },
       supportingContent = { subtitle?.let { Text(it) } },
       trailingContent = { Icon(painterResource(R.drawable.baseline_navigate_next_24), null) },
-      colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+      colors =
+          ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
   )
 }
 
-private enum class SettingsSection(val titleRes: Int, val summaryRes: Int, val iconRes: Int) {
-  APPEARANCE(R.string.appearance, R.string.appearance_summary, R.drawable.ic_palette_24),
-  GMAIL(R.string.gmail_otp_title, R.string.gmail_settings_summary, R.drawable.ic_email_24),
-  CONTENT(R.string.content_and_detection, R.string.content_settings_summary, R.drawable.ic_language_24),
-  NOTIFICATIONS(R.string.notifications, R.string.notifications_settings_summary, R.drawable.ic_notifications_24),
-  HISTORY(R.string.history, R.string.history_settings_summary, R.drawable.ic_history_24),
-  ADVANCED(R.string.advanced_settings, R.string.advanced_settings_summary, R.drawable.ic_tune_24),
-  PRIVACY(R.string.privacy, R.string.privacy_settings_summary, R.drawable.ic_security_24),
-  INTEGRATIONS(R.string.integrations, R.string.integrations_settings_summary, R.drawable.ic_extension_24),
+@Composable
+private fun SettingsSectionGroup(
+    title: String,
+    sections: List<SettingsSection>,
+    onSectionSelected: (SettingsSection) -> Unit,
+) {
+  SettingGroup(title = title) {
+    sections.forEachIndexed { index, section ->
+      if (index > 0) HorizontalDivider()
+      SettingsNavigationRow(
+          title = stringResource(section.titleRes),
+          subtitle = stringResource(section.summaryRes),
+          iconRes = section.iconRes,
+          onClick = { onSectionSelected(section) },
+      )
+    }
+  }
+}
+
+private enum class SettingsCategory {
+  PERSONALIZATION,
+  APP_BEHAVIOR,
+}
+
+private enum class SettingsSection(
+    val titleRes: Int,
+    val summaryRes: Int,
+    val iconRes: Int,
+    val category: SettingsCategory,
+) {
+  APPEARANCE(
+      R.string.appearance,
+      R.string.appearance_summary,
+      R.drawable.ic_palette_24,
+      SettingsCategory.PERSONALIZATION,
+  ),
+  GMAIL(
+      R.string.gmail_otp_title,
+      R.string.gmail_settings_summary,
+      R.drawable.ic_email_24,
+      SettingsCategory.PERSONALIZATION,
+  ),
+  CONTENT(
+      R.string.content_and_detection,
+      R.string.content_settings_summary,
+      R.drawable.ic_language_24,
+      SettingsCategory.PERSONALIZATION,
+  ),
+  NOTIFICATIONS(
+      R.string.notifications,
+      R.string.notifications_settings_summary,
+      R.drawable.ic_notifications_24,
+      SettingsCategory.APP_BEHAVIOR,
+  ),
+  HISTORY(
+      R.string.history,
+      R.string.history_settings_summary,
+      R.drawable.ic_history_24,
+      SettingsCategory.APP_BEHAVIOR,
+  ),
+  PRIVACY(
+      R.string.privacy,
+      R.string.privacy_settings_summary,
+      R.drawable.ic_security_24,
+      SettingsCategory.APP_BEHAVIOR,
+  ),
+  ADVANCED(
+      R.string.advanced_settings,
+      R.string.advanced_settings_summary,
+      R.drawable.ic_tune_24,
+      SettingsCategory.APP_BEHAVIOR,
+  ),
+  INTEGRATIONS(
+      R.string.integrations,
+      R.string.integrations_settings_summary,
+      R.drawable.ic_extension_24,
+      SettingsCategory.APP_BEHAVIOR,
+  ),
 }
 
 @Composable
