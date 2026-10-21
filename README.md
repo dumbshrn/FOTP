@@ -6,15 +6,51 @@ FOTP is a modified fork of [OTP Helper](https://github.com/jd1378/otphelper), or
 
 SMS and notification detection work locally. The optional Gmail feature uses Gmail's read-only API only when you explicitly fetch; it checks up to 10 recent inbox messages and does not monitor Gmail in the background or save message bodies. The detected code is handled using your existing copy, notification, and history preferences.
 
-Download the test APK from the [GitHub Actions workflow artifacts](https://github.com/dumbshrn/otphelper/actions). When the release signing secrets are configured, the workflow also uploads a signed release APK.
+Download the test APK from the [GitHub Actions workflow artifacts](https://github.com/dumbshrn/FOTP/actions). When the release signing secrets are configured, the workflow also uploads a signed release APK.
 
-## Gmail OTP setup
+## Gmail OTP setup (testing)
 
-1. In Google Cloud, enable the Gmail API and configure the OAuth consent screen. While the app is in testing, add your Google account as a test user.
-2. Create an Android OAuth client for application ID `com.dumbshrn.otphelper` and the SHA-1 fingerprint matching the APK you install. The workflow summary prints the debug test APK fingerprint and, when release signing is configured, the release APK fingerprint.
-3. Install the signed APK, open Settings, tap **Connect Gmail**, and approve Gmail read-only access. Then tap **Fetch OTP from Gmail**; you can also use the Quick Settings tile after adding it from the tile editor.
+Gmail fetching is optional. This guide sets up your own Google OAuth project so you can test the Gmail feature with accounts you control. Google OAuth **Testing** allows up to 100 listed test users; it is not approval for a public release, and other people cannot connect Gmail unless they are added as test users.
 
-The Android OAuth client ID is registered in Google Cloud; this app uses Google Play services authorization and does not embed a web client secret or persist OAuth tokens. The Android OAuth client must match both this package and the release APK's SHA-1. For signed APK builds, configure this repository's Actions secrets `ANDROID_SIGNING_KEY`, `ANDROID_ALIAS`, `ANDROID_KEY_STORE_PASSWORD`, and `ANDROID_KEY_PASSWORD`; secrets in a different repository are not shared. Public distribution using Gmail read-only access may require Google OAuth verification.
+### 1. Create a Google Cloud project and enable Gmail API
+
+1. Open the [Google Cloud Console](https://console.cloud.google.com/) and create or select a project.
+2. Open **APIs & Services → Library**, find **Gmail API**, and enable it for that project.
+3. Open **Google Auth Platform** (or **APIs & Services → OAuth consent screen**, depending on the Console layout) and configure the app name, support email, and developer contact email.
+4. Choose **External** for the audience if you are testing with ordinary Google accounts. Leave the publishing status as **Testing**.
+5. In the **Data Access** page, add the Gmail read-only scope: `https://www.googleapis.com/auth/gmail.readonly`.
+6. In **Audience → Test users**, add every Google account that will try the Gmail feature, then save.
+
+### 2. Create the Android OAuth client
+
+Google checks both the Android package name and the signing certificate. They must match the exact APK installed on the device.
+
+1. In Google Cloud, open **Google Auth Platform → Clients** (or **APIs & Services → Credentials**) and create an **Android** OAuth client.
+2. Enter this package name exactly: `com.dumbshrn.otphelper`.
+3. Enter the SHA-1 certificate fingerprint for the APK you plan to install:
+   - For an APK downloaded from this repository's GitHub Actions, open the successful run's summary and copy **Debug signer SHA-1** for the test APK, or **APK signer SHA-1** for the signed release APK.
+   - For a locally built APK, run `./gradlew signingReport` from the repository and use the SHA-1 for the variant you installed.
+4. Create the client. If you install APKs signed with different certificates (for example, a CI test APK and a locally built APK), register a separate Android OAuth client for each package/SHA-1 combination.
+
+### 3. Install FOTP and connect Gmail
+
+1. Download and install the **test APK** from a successful [Build artifact workflow run](https://github.com/dumbshrn/FOTP/actions/workflows/build_artifact.yml). The APK is in the `otp-helper-test-apk` artifact.
+2. Open FOTP → **Settings → Gmail OTP → Add Gmail account** (or **Connect Gmail**, depending on the screen version).
+3. Choose an account you added as a test user and approve Gmail read-only access. If Google displays an unverified-app warning while the project is in Testing, proceed only for your own test account after verifying you selected your own test project and understand the requested read-only access.
+4. Tap **Fetch OTP from Gmail**. The app checks up to 100 inbox messages from the last seven days only when you request a fetch; it does not continuously monitor Gmail. You can also add FOTP's Gmail tile from Android's Quick Settings tile editor and use it to fetch on demand.
+
+### Troubleshooting
+
+- **`Access blocked` or account cannot authorize:** confirm the Google account is listed under **Test users**, the consent screen is still in Testing, and the Gmail read-only scope is configured.
+- **Developer error / OAuth client mismatch:** confirm the package name is exactly `com.dumbshrn.otphelper` and the SHA-1 belongs to the installed APK's signer. Recheck the workflow summary for the correct artifact fingerprint.
+- **No code found:** check that the message is in the inbox and contains a supported one-time code. FOTP parses the message body and checks recent messages; booking references, fares, seat numbers, and other unrelated numbers should not be treated as OTPs.
+- **Testing authorization expires:** Google may expire refresh tokens for External apps left in Testing after seven days when they use non-basic scopes. Reconnect the account to authorize again.
+
+### Before a public release
+
+The Gmail feature requests a restricted Gmail scope. Keeping the project in Testing and adding test users is for development and personal testing; it does not make Gmail access available to everyone. A public release that offers Gmail fetching must follow Google's OAuth verification and Gmail user-data policy requirements. See [Google's restricted-scope verification guide](https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification) and [Gmail API scopes](https://developers.google.com/workspace/gmail/api/auth/scopes). If you do not want to pursue verification, release a version that does not offer Gmail fetching.
+
+The Android OAuth client is registered in Google Cloud; FOTP uses Google Play services authorization and does not embed a web client secret or persist OAuth access tokens. For signed APK builds, configure this repository's Actions secrets `ANDROID_SIGNING_KEY`, `ANDROID_ALIAS`, `ANDROID_KEY_STORE_PASSWORD`, and `ANDROID_KEY_PASSWORD`; secrets in a different repository are not shared.
 
 ## How it works
 
