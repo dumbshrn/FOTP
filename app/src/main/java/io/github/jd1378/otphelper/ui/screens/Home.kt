@@ -16,13 +16,16 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,7 +37,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.jd1378.otphelper.R
 import io.github.jd1378.otphelper.data.local.entity.DetectedCode
+import io.github.jd1378.otphelper.di.LatestOtp
 import io.github.jd1378.otphelper.ui.components.SettingGroup
+import io.github.jd1378.otphelper.ui.components.getAppInfo
 import io.github.jd1378.otphelper.ui.navigation.MainDestinations
 import io.github.jd1378.otphelper.utils.Clipboard
 import io.github.jd1378.otphelper.utils.CodeExtractor
@@ -48,6 +53,8 @@ fun Home(
 ) {
   val userSettings by viewModel.userSettings.collectAsStateWithLifecycle()
   val latestCodes by viewModel.latestCodes.collectAsStateWithLifecycle()
+  val latestOtpCode by viewModel.latestOtpCode.collectAsStateWithLifecycle()
+  var isCodeVisible by remember { mutableStateOf(true) }
   val context = LocalContext.current
   val codeExtractor =
       remember(userSettings.sensitivePhrasesList, userSettings.ignoredPhrasesList, userSettings.cleanupPhrasesList) {
@@ -87,11 +94,18 @@ fun Home(
     item {
       val latest = latestCodes.firstOrNull()
       val latestCode =
-          if (latest == null || userSettings.shouldReplaceCodeInHistory) null
-          else codeExtractor.getCode(latest.text)
+          latestOtpCode?.code
+              ?: if (latest != null && !userSettings.shouldReplaceCodeInHistory) {
+                codeExtractor.getCode(latest.text)
+              } else {
+                null
+              }
       LatestCodeCard(
           detectedCode = latest,
+          latestOtp = latestOtpCode,
           code = latestCode,
+          isCodeVisible = isCodeVisible,
+          onToggleVisibility = { isCodeVisible = !isCodeVisible },
           onCopy = {
             latestCode?.let {
               Clipboard.copyCodeToClipboard(
@@ -116,15 +130,7 @@ fun Home(
       }
     }
 
-    item {
-      Text(
-          text = stringResource(R.string.recent_codes),
-          style = MaterialTheme.typography.titleLarge,
-          fontWeight = FontWeight.SemiBold,
-      )
-    }
-
-    if (latestCodes.isEmpty()) {
+    if (latestCodes.isEmpty() && latestOtpCode == null) {
       item {
         SettingGroup(title = stringResource(R.string.no_codes_yet)) {
           Text(
@@ -143,21 +149,28 @@ fun Home(
           }
         }
       }
-    } else {
+    } else if (latestCodes.isNotEmpty()) {
+      item {
+        Text(
+            text = stringResource(R.string.recent_codes),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+        )
+      }
       items(latestCodes.drop(1), key = { it.id }) { detected ->
         RecentCodeRow(
             detectedCode = detected,
             code = if (userSettings.shouldReplaceCodeInHistory) null else codeExtractor.getCode(detected.text),
+            appLabel = getAppInfo(context, detected.packageName).appLabel,
         )
       }
-    }
-
-    item {
-      OutlinedButton(
-          onClick = { onNavigateToRoute(MainDestinations.HISTORY_ROUTE, false, true) },
-          modifier = Modifier.fillMaxWidth(),
-      ) {
-        Text(stringResource(R.string.view_history))
+      item {
+        OutlinedButton(
+            onClick = { onNavigateToRoute(MainDestinations.HISTORY_ROUTE, false, true) },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+          Text(stringResource(R.string.view_history))
+        }
       }
     }
   }
@@ -166,9 +179,22 @@ fun Home(
 @Composable
 private fun LatestCodeCard(
     detectedCode: DetectedCode?,
+    latestOtp: LatestOtp?,
     code: String?,
+    isCodeVisible: Boolean,
+    onToggleVisibility: () -> Unit,
     onCopy: () -> Unit,
 ) {
+  val context = LocalContext.current
+  val source =
+      latestOtp?.let {
+        detectedCodeSourceLabel(
+            it.notificationTag,
+            it.smsOrigin,
+            getAppInfo(context, it.packageName).appLabel,
+        )
+      }
+  val timestamp = latestOtp?.let { Date(it.capturedAtMillis) } ?: detectedCode?.createdAt
   Card(
       modifier = Modifier.fillMaxWidth(),
       shape = RoundedCornerShape(32.dp),
@@ -178,26 +204,54 @@ private fun LatestCodeCard(
         modifier = Modifier.padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-      Text(
-          text = stringResource(R.string.latest_code),
-          style = MaterialTheme.typography.titleMedium,
-          color = MaterialTheme.colorScheme.onPrimaryContainer,
-      )
+      Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Text(
+            text = stringResource(R.string.latest_code),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
+        if (code != null) {
+          IconButton(onClick = onToggleVisibility) {
+            Icon(
+                painter = painterResource(
+                    if (isCodeVisible) R.drawable.baseline_visibility_off_24
+                    else R.drawable.baseline_visibility_24
+                ),
+                contentDescription = stringResource(
+                    if (isCodeVisible) R.string.hide_code else R.string.show_code
+                ),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+          }
+        }
+      }
       Text(
           text =
-              code
-                  ?: stringResource(
-                      if (detectedCode == null) R.string.no_code_available
-                      else R.string.code_hidden_for_privacy
-                  ),
+              when {
+                code != null && isCodeVisible -> code
+                code != null -> "••••••"
+                detectedCode == null -> stringResource(R.string.no_code_available)
+                else -> stringResource(R.string.no_current_code)
+              },
           style = MaterialTheme.typography.displaySmall,
           fontFamily = FontFamily.Monospace,
           fontWeight = FontWeight.Bold,
           color = MaterialTheme.colorScheme.onPrimaryContainer,
       )
       Text(
-          text = detectedCode?.let { sourceLabel(it) + " · " + relativeTime(it.createdAt) }
-              ?: stringResource(R.string.waiting_for_codes),
+          text =
+              if (timestamp != null) {
+                (source ?: detectedCode?.let {
+                  sourceLabel(it, getAppInfo(context, it.packageName).appLabel)
+                }.orEmpty()) +
+                    " · " + relativeTime(timestamp)
+              } else {
+                stringResource(R.string.waiting_for_codes)
+              },
           style = MaterialTheme.typography.bodyMedium,
           color = MaterialTheme.colorScheme.onPrimaryContainer,
       )
@@ -210,7 +264,7 @@ private fun LatestCodeCard(
 }
 
 @Composable
-private fun RecentCodeRow(detectedCode: DetectedCode, code: String?) {
+private fun RecentCodeRow(detectedCode: DetectedCode, code: String?, appLabel: String) {
   Surface(
       color = MaterialTheme.colorScheme.surfaceContainer,
       shape = RoundedCornerShape(24.dp),
@@ -222,16 +276,18 @@ private fun RecentCodeRow(detectedCode: DetectedCode, code: String?) {
     ) {
       Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
-            text = code ?: stringResource(R.string.code_hidden_for_privacy),
-            style = MaterialTheme.typography.titleLarge,
-            fontFamily = FontFamily.Monospace,
+            text = code ?: sourceLabel(detectedCode, appLabel),
+            style = if (code != null) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
+            fontFamily = if (code != null) FontFamily.Monospace else FontFamily.Default,
             fontWeight = FontWeight.SemiBold,
         )
-        Text(
-            text = sourceLabel(detectedCode),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        if (code != null) {
+          Text(
+              text = sourceLabel(detectedCode, appLabel),
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
       }
       Text(
           text = relativeTime(detectedCode.createdAt),
@@ -242,12 +298,12 @@ private fun RecentCodeRow(detectedCode: DetectedCode, code: String?) {
   }
 }
 
-private fun sourceLabel(detectedCode: DetectedCode): String =
-    when {
-      detectedCode.notificationTag == "gmail" -> "Gmail"
-      detectedCode.smsOrigin.isNotBlank() -> detectedCode.smsOrigin
-      else -> detectedCode.packageName
-    }
+private fun sourceLabel(detectedCode: DetectedCode, appLabel: String): String =
+    detectedCodeSourceLabel(
+        detectedCode.notificationTag,
+        detectedCode.smsOrigin,
+        appLabel,
+    )
 
 private fun relativeTime(date: Date): String =
     DateUtils.getRelativeTimeSpanString(date.time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS)

@@ -192,7 +192,15 @@ fun DetectedCodeListItem(modifier: Modifier = Modifier, detectedCode: DetectedCo
             modifier = Modifier.size(64.dp).clip(RoundedCornerShape(10.dp)),
         )
       },
-      headlineContent = { Text(detectedCode.smsOrigin.ifBlank { appInfo.appLabel }) },
+      headlineContent = {
+        Text(
+            detectedCodeSourceLabel(
+                detectedCode.notificationTag,
+                detectedCode.smsOrigin,
+                appInfo.appLabel,
+            )
+        )
+      },
       supportingContent = {
         Text(
             text =

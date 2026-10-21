@@ -36,8 +36,9 @@ fun OtpHelperApp(
   val colorPalette = AppColorPalette.fromStoredValue(userSettings.colorPalette)
   OtpHelperTheme(
       darkTheme = AppThemeMode.fromStoredValue(userSettings.themeMode).isDark(isSystemInDarkTheme()),
+      amoledTheme = AppThemeMode.fromStoredValue(userSettings.themeMode) == AppThemeMode.AMOLED,
       dynamicColor = colorPalette == AppColorPalette.MATERIAL_YOU,
-      viviInspiredPalette = colorPalette == AppColorPalette.VIVI_INSPIRED,
+      colorPalette = colorPalette,
   ) {
     val theNavController = rememberTheNavController()
     val event by deepLinkHandler.event.collectAsState()

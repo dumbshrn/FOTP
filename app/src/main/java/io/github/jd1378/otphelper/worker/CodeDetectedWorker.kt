@@ -14,6 +14,7 @@ import io.github.jd1378.otphelper.data.local.db.OtpHelperDatabase
 import io.github.jd1378.otphelper.data.local.entity.DetectedCode
 import io.github.jd1378.otphelper.di.DETECTION_LOCK
 import io.github.jd1378.otphelper.di.DETECTION_TIMEOUT_MS
+import io.github.jd1378.otphelper.di.LatestOtpHolder
 import io.github.jd1378.otphelper.di.RecentDetectedMessageHolder
 import io.github.jd1378.otphelper.repository.IgnoredNotifsRepository
 import io.github.jd1378.otphelper.repository.UserSettingsRepository
@@ -33,6 +34,7 @@ constructor(
     private val userSettingsRepository: UserSettingsRepository,
     private val ignoredNotifsRepository: IgnoredNotifsRepository,
     private var recentDetectedMessageHolder: RecentDetectedMessageHolder,
+    private val latestOtpHolder: LatestOtpHolder,
 ) : CoroutineWorker(context, workerParams) {
 
   companion object {
@@ -84,6 +86,7 @@ constructor(
     }
 
     val settings = userSettingsRepository.fetchSettings()
+    latestOtpHolder.update(code, packageName, notificationTag, smsOrigin)
     AppLogger.i(
         TAG,
         "processing detection: isSms=$isSms, pkg=$packageName, " +

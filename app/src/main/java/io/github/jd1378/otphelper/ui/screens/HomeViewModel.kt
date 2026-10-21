@@ -12,6 +12,7 @@ import io.github.jd1378.otphelper.repository.UserSettingsRepository
 import io.github.jd1378.otphelper.repository.DetectedCodeRepository
 import io.github.jd1378.otphelper.data.local.entity.DetectedCode
 import io.github.jd1378.otphelper.gmail.GmailFetchWorker
+import io.github.jd1378.otphelper.di.LatestOtpHolder
 import io.github.jd1378.otphelper.utils.NotificationHelper
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -25,6 +26,7 @@ constructor(
     private val savedStateHandle: SavedStateHandle,
     userSettingsRepository: UserSettingsRepository,
     detectedCodeRepository: DetectedCodeRepository,
+    latestOtpHolder: LatestOtpHolder,
 ) : ViewModel() {
 
   val userSettings =
@@ -38,6 +40,13 @@ constructor(
           scope = viewModelScope,
           started = SharingStarted.WhileSubscribed(5_000),
           initialValue = emptyList<DetectedCode>(),
+      )
+
+  val latestOtpCode =
+      latestOtpHolder.latestOtp.stateIn(
+          scope = viewModelScope,
+          started = SharingStarted.Eagerly,
+          initialValue = null,
       )
 
   fun onSendTestNotifPressed(context: Context) {

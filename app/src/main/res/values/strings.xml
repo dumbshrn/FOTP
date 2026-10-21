@@ -220,7 +220,13 @@
   <string name="recent_codes">Recent codes</string>
   <string name="latest_code">Latest code</string>
   <string name="no_code_available">No code yet</string>
-  <string name="code_hidden_for_privacy">Hidden for privacy</string>
+  <string name="hide_code">Hide code</string>
+  <string name="show_code">Show code</string>
+  <string name="no_current_code">No code captured since opening the app</string>
+  <string name="setup_and_access">Setup &amp; access</string>
+  <string name="settings_mode_help">Choose how OTPs are detected</string>
+  <string name="settings_permissions_help">Review the access OTP Helper needs</string>
+  <string name="content_and_detection">Content &amp; detection</string>
   <string name="waiting_for_codes">Waiting for a new code</string>
   <string name="no_codes_yet">No codes yet</string>
   <string name="codes_empty_help">Enable a detection source or fetch your Gmail to see codes here.</string>
@@ -231,9 +237,15 @@
   <string name="theme_system">System</string>
   <string name="theme_light">Light</string>
   <string name="theme_dark">Dark</string>
+  <string name="theme_amoled">AMOLED</string>
   <string name="color_palette">Color palette</string>
   <string name="palette_material_you">Material You</string>
-  <string name="palette_vivi">Vivi-inspired</string>
+  <string name="palette_blue">Blue</string>
+  <string name="palette_violet">Violet</string>
+  <string name="palette_green">Green</string>
+  <string name="palette_rose">Rose</string>
+  <string name="custom_colors">Accent colors</string>
+  <string name="custom_colors_desc">Choose an accent palette for buttons and highlights</string>
+  <string name="gmail_account_connected">Connected for read-only OTP fetching</string>
   <string name="palette_material_you_desc">Use colors from your wallpaper</string>
-  <string name="palette_vivi_desc">Use a dark plum and blush palette</string>
 </resources>

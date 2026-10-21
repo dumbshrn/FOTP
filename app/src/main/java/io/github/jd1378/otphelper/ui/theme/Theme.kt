@@ -76,54 +76,6 @@ import com.example.compose.md_theme_light_surfaceVariant
 import com.example.compose.md_theme_light_tertiary
 import com.example.compose.md_theme_light_tertiaryContainer
 
-private val viviLightColors =
-    lightColorScheme(
-        primary = Color(0xFF7D3654),
-        onPrimary = Color.White,
-        primaryContainer = Color(0xFFFFD9E5),
-        onPrimaryContainer = Color(0xFF3A071F),
-        secondary = Color(0xFF705760),
-        onSecondary = Color.White,
-        secondaryContainer = Color(0xFFF8DCE6),
-        onSecondaryContainer = Color(0xFF281720),
-        tertiary = Color(0xFF4C626F),
-        onTertiary = Color.White,
-        tertiaryContainer = Color(0xFFD0E6F3),
-        onTertiaryContainer = Color(0xFF071E29),
-        background = Color(0xFFFFF7F9),
-        onBackground = Color(0xFF21191C),
-        surface = Color(0xFFFFF7F9),
-        onSurface = Color(0xFF21191C),
-        surfaceVariant = Color(0xFFF0DEE4),
-        onSurfaceVariant = Color(0xFF514148),
-        outline = Color(0xFF837179),
-        outlineVariant = Color(0xFFD5C2C9),
-    )
-
-private val viviDarkColors =
-    darkColorScheme(
-        primary = Color(0xFFFFB1CC),
-        onPrimary = Color(0xFF4B102D),
-        primaryContainer = Color(0xFF682A46),
-        onPrimaryContainer = Color(0xFFFFD9E5),
-        secondary = Color(0xFFDBC0CA),
-        onSecondary = Color(0xFF3E2A32),
-        secondaryContainer = Color(0xFF55404A),
-        onSecondaryContainer = Color(0xFFF8DCE6),
-        tertiary = Color(0xFFB4CAD8),
-        onTertiary = Color(0xFF1D333F),
-        tertiaryContainer = Color(0xFF344A57),
-        onTertiaryContainer = Color(0xFFD0E6F3),
-        background = Color(0xFF100D0F),
-        onBackground = Color(0xFFF2E5E9),
-        surface = Color(0xFF100D0F),
-        onSurface = Color(0xFFF2E5E9),
-        surfaceVariant = Color(0xFF302329),
-        onSurfaceVariant = Color(0xFFD5C2C9),
-        outline = Color(0xFF9E8992),
-        outlineVariant = Color(0xFF514148),
-    )
-
 private val lightColors =
     lightColorScheme(
         primary = md_theme_light_primary,
@@ -204,13 +156,15 @@ fun OtpHelperTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
-    viviInspiredPalette: Boolean = false,
+    amoledTheme: Boolean = false,
+    colorPalette: AppColorPalette = AppColorPalette.MATERIAL_YOU,
     content: @Composable () -> Unit,
 ) {
   val colorScheme =
       when {
-        viviInspiredPalette && darkTheme -> viviDarkColors
-        viviInspiredPalette -> viviLightColors
+        colorPalette != AppColorPalette.MATERIAL_YOU && darkTheme ->
+            customAccent(darkColors, colorPalette, true)
+        colorPalette != AppColorPalette.MATERIAL_YOU -> customAccent(lightColors, colorPalette, false)
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
           val context = LocalContext.current
           if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
@@ -218,13 +172,21 @@ fun OtpHelperTheme(
         darkTheme -> darkColors
         else -> lightColors
       }
+  val resolvedColorScheme =
+      if (amoledTheme) {
+        colorScheme.copy(
+            background = Color.Black,
+            surface = Color.Black,
+            surfaceVariant = Color(0xFF171717),
+        )
+      } else colorScheme
   val view = LocalView.current
   if (!view.isInEditMode) {
     SideEffect {
       val window = (view.context as Activity).window
 
-      window.statusBarColor = colorScheme.background.toArgb()
-      window.decorView.setBackgroundColor(colorScheme.background.toArgb())
+      window.statusBarColor = resolvedColorScheme.background.toArgb()
+      window.decorView.setBackgroundColor(resolvedColorScheme.background.toArgb())
       WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
     }
   }
@@ -243,6 +205,37 @@ fun OtpHelperTheme(
       }
 
   CompositionLocalProvider(LocalCustomColors provides customColors) {
-    MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
+    MaterialTheme(colorScheme = resolvedColorScheme, typography = Typography, content = content)
   }
+}
+
+private fun customAccent(
+    scheme: androidx.compose.material3.ColorScheme,
+    palette: AppColorPalette,
+    isDark: Boolean,
+): androidx.compose.material3.ColorScheme {
+  val (primary, container, onContainer, secondary, tertiary) =
+      when (palette) {
+        AppColorPalette.BLUE ->
+            if (isDark) listOf(Color(0xFFA8C7FA), Color(0xFF304A68), Color(0xFFD7E3FF), Color(0xFFB9C8E8), Color(0xFFB5D0F3))
+            else listOf(Color(0xFF315B91), Color(0xFFD7E3FF), Color(0xFF0B1C34), Color(0xFF52627A), Color(0xFF4B6378))
+        AppColorPalette.VIOLET ->
+            if (isDark) listOf(Color(0xFFD0BCFF), Color(0xFF493B66), Color(0xFFEADDFF), Color(0xFFCBC0E8), Color(0xFFE2BBDD))
+            else listOf(Color(0xFF62538C), Color(0xFFEADDFF), Color(0xFF21143F), Color(0xFF625A71), Color(0xFF7B526F))
+        AppColorPalette.GREEN ->
+            if (isDark) listOf(Color(0xFF8AD6B2), Color(0xFF20513B), Color(0xFFB8F2D0), Color(0xFFB0D0BE), Color(0xFFB6D2E5))
+            else listOf(Color(0xFF176B49), Color(0xFFB8F2D0), Color(0xFF002114), Color(0xFF50665A), Color(0xFF416474))
+        AppColorPalette.ROSE ->
+            if (isDark) listOf(Color(0xFFFFB1C8), Color(0xFF633344), Color(0xFFFFD9E3), Color(0xFFE0BDC5), Color(0xFFE5BFD9))
+            else listOf(Color(0xFF8D4058), Color(0xFFFFD9E3), Color(0xFF390A1C), Color(0xFF70565D), Color(0xFF78536B))
+        AppColorPalette.MATERIAL_YOU -> return scheme
+      }
+  return scheme.copy(
+      primary = primary,
+      primaryContainer = container,
+      onPrimaryContainer = onContainer,
+      secondary = secondary,
+      tertiary = tertiary,
+      surfaceTint = primary,
+  )
 }

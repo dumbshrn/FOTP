@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -15,6 +17,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -24,9 +27,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -42,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -60,7 +64,6 @@ import io.github.jd1378.otphelper.repository.UserSettingsRepositoryMock
 import io.github.jd1378.otphelper.ui.components.CodeBlock
 import io.github.jd1378.otphelper.ui.components.SettingHelp
 import io.github.jd1378.otphelper.ui.components.SettingLabel
-import io.github.jd1378.otphelper.ui.components.SettingPageLink
 import io.github.jd1378.otphelper.ui.components.TitleBar
 import io.github.jd1378.otphelper.ui.navigation.MainDestinations
 import io.github.jd1378.otphelper.ui.theme.OtpHelperTheme
@@ -72,6 +75,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 fun Settings(
     onNavigateToRoute: (String, Boolean, Boolean) -> Unit,
     upPress: () -> Unit,
@@ -116,43 +120,68 @@ fun Settings(
                 .verticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_sections)),
     ) {
+      SettingGroup(title = stringResource(R.string.setup_and_access)) {
+        SettingsNavigationRow(
+            title = stringResource(R.string.MODE_ROUTE),
+            subtitle = stringResource(R.string.settings_mode_help),
+            onClick = { onNavigateToRoute(MainDestinations.MODE_ROUTE, false, true) },
+        )
+        HorizontalDivider()
+        SettingsNavigationRow(
+            title = stringResource(R.string.PERMISSION_ROUTE),
+            subtitle = stringResource(R.string.settings_permissions_help),
+            onClick = { onNavigateToRoute(MainDestinations.PERMISSIONS_ROUTE, false, true) },
+        )
+      }
+
       SettingGroup(title = stringResource(R.string.appearance)) {
         Text(stringResource(R.string.theme_mode), style = MaterialTheme.typography.titleSmall)
-        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-          AppThemeMode.entries.forEachIndexed { index, themeMode ->
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          AppThemeMode.entries.forEach { themeMode ->
             val label =
                 when (themeMode) {
                   AppThemeMode.SYSTEM -> stringResource(R.string.theme_system)
                   AppThemeMode.LIGHT -> stringResource(R.string.theme_light)
                   AppThemeMode.DARK -> stringResource(R.string.theme_dark)
+                  AppThemeMode.AMOLED -> stringResource(R.string.theme_amoled)
                 }
-            SegmentedButton(
+            FilterChip(
                 selected = userSettings.themeMode == themeMode.storedValue,
                 onClick = { viewModel.setThemeMode(themeMode) },
-                shape = SegmentedButtonDefaults.itemShape(index, AppThemeMode.entries.size),
                 label = { Text(label) },
             )
           }
         }
-        Text(stringResource(R.string.color_palette), style = MaterialTheme.typography.titleSmall)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          FilterChip(
-              selected = userSettings.colorPalette == AppColorPalette.MATERIAL_YOU.storedValue,
-              onClick = { viewModel.setColorPalette(AppColorPalette.MATERIAL_YOU) },
-              label = { Text(stringResource(R.string.palette_material_you)) },
-          )
-          FilterChip(
-              selected = userSettings.colorPalette == AppColorPalette.VIVI_INSPIRED.storedValue,
-              onClick = { viewModel.setColorPalette(AppColorPalette.VIVI_INSPIRED) },
-              label = { Text(stringResource(R.string.palette_vivi)) },
-          )
+        Text(stringResource(R.string.custom_colors), style = MaterialTheme.typography.titleSmall)
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          AppColorPalette.entries.forEach { palette ->
+            val label =
+                when (palette) {
+                  AppColorPalette.MATERIAL_YOU -> stringResource(R.string.palette_material_you)
+                  AppColorPalette.BLUE -> stringResource(R.string.palette_blue)
+                  AppColorPalette.VIOLET -> stringResource(R.string.palette_violet)
+                  AppColorPalette.GREEN -> stringResource(R.string.palette_green)
+                  AppColorPalette.ROSE -> stringResource(R.string.palette_rose)
+                }
+            FilterChip(
+                selected = userSettings.colorPalette == palette.storedValue,
+                onClick = { viewModel.setColorPalette(palette) },
+                label = { Text(label) },
+            )
+          }
         }
         Text(
             text =
                 stringResource(
                     if (userSettings.colorPalette == AppColorPalette.MATERIAL_YOU.storedValue)
                         R.string.palette_material_you_desc
-                    else R.string.palette_vivi_desc
+                    else R.string.custom_colors_desc
                 ),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -161,39 +190,39 @@ fun Settings(
 
       SettingGroup(title = stringResource(R.string.gmail_otp_title)) {
         Column(
-            modifier =
-                Modifier.padding(
-                    horizontal = dimensionResource(R.dimen.padding_li_h),
-                    vertical = dimensionResource(R.dimen.padding_li_v),
-                ),
+            modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.padding_settings)),
         ) {
           Text(stringResource(R.string.gmail_connected_accounts))
           if (connectedGmails.isEmpty()) {
             Text(stringResource(R.string.gmail_no_connected_accounts))
           }
-          connectedGmails.forEach { emailAddress ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement =
-                    Arrangement.spacedBy(dimensionResource(R.dimen.padding_settings)),
-            ) {
-              Text(emailAddress, modifier = Modifier.weight(1f))
-              Button(
-                  onClick = {
-                    context.startActivity(
-                        Intent(context, GmailFetchActivity::class.java)
-                            .setAction(GmailFetchActivity.ACTION_DISCONNECT)
-                            .putExtra(GmailFetchActivity.EXTRA_EMAIL_ADDRESS, emailAddress)
-                    )
-                  },
-              ) {
-                Text(stringResource(R.string.gmail_disconnect))
-              }
-            }
+          connectedGmails.forEachIndexed { index, emailAddress ->
+            if (index > 0) HorizontalDivider()
+            ListItem(
+                leadingContent = { Icon(Icons.Outlined.Email, contentDescription = null) },
+                headlineContent = { Text(emailAddress) },
+                supportingContent = { Text(stringResource(R.string.gmail_account_connected)) },
+                trailingContent = {
+                  androidx.compose.material3.TextButton(
+                      onClick = {
+                        context.startActivity(
+                            Intent(context, GmailFetchActivity::class.java)
+                                .setAction(GmailFetchActivity.ACTION_DISCONNECT)
+                                .putExtra(GmailFetchActivity.EXTRA_EMAIL_ADDRESS, emailAddress)
+                        )
+                      },
+                  ) {
+                    Text(stringResource(R.string.gmail_disconnect))
+                  }
+                },
+                colors =
+                    ListItemDefaults.colors(
+                        containerColor = androidx.compose.ui.graphics.Color.Transparent
+                    ),
+            )
           }
-          Button(
+          androidx.compose.material3.OutlinedButton(
               modifier = Modifier.fillMaxWidth(),
               onClick = {
                 context.startActivity(
@@ -214,46 +243,33 @@ fun Settings(
         }
       }
 
-      SettingPageLink(
-          modifier =
-              Modifier.clickable {
-                onNavigateToRoute(MainDestinations.LANGUAGE_SELECTION_ROUTE, false, true)
-              },
-          title = stringResource(R.string.language),
-          subtitle = getCurrentLocale()?.displayLanguage ?: stringResource(R.string.error),
-      )
-
-      SettingPageLink(
-          modifier =
-              Modifier.clickable {
-                onNavigateToRoute(MainDestinations.SENSITIVE_PHRASES_ROUTE, false, true)
-              },
-          title = stringResource(R.string.sensitive_phrases),
-      )
-
-      SettingPageLink(
-          modifier =
-              Modifier.clickable {
-                onNavigateToRoute(MainDestinations.IGNORED_PHRASES_ROUTE, false, true)
-              },
-          title = stringResource(R.string.ignored_phrases),
-      )
-
-      SettingPageLink(
-          modifier =
-              Modifier.clickable {
-                onNavigateToRoute(MainDestinations.CLEANUP_PHRASES_ROUTE, false, true)
-              },
-          title = stringResource(R.string.cleanup_phrases),
-      )
-
-      SettingPageLink(
-          modifier =
-              Modifier.clickable {
-                onNavigateToRoute(MainDestinations.DETECTION_TEST_ROUTE, false, true)
-              },
-          title = stringResource(R.string.detection_test),
-      )
+      SettingGroup(title = stringResource(R.string.content_and_detection)) {
+        SettingsNavigationRow(
+            title = stringResource(R.string.language),
+            subtitle = getCurrentLocale()?.displayLanguage ?: stringResource(R.string.error),
+            onClick = { onNavigateToRoute(MainDestinations.LANGUAGE_SELECTION_ROUTE, false, true) },
+        )
+        HorizontalDivider()
+        SettingsNavigationRow(
+            title = stringResource(R.string.sensitive_phrases),
+            onClick = { onNavigateToRoute(MainDestinations.SENSITIVE_PHRASES_ROUTE, false, true) },
+        )
+        HorizontalDivider()
+        SettingsNavigationRow(
+            title = stringResource(R.string.ignored_phrases),
+            onClick = { onNavigateToRoute(MainDestinations.IGNORED_PHRASES_ROUTE, false, true) },
+        )
+        HorizontalDivider()
+        SettingsNavigationRow(
+            title = stringResource(R.string.cleanup_phrases),
+            onClick = { onNavigateToRoute(MainDestinations.CLEANUP_PHRASES_ROUTE, false, true) },
+        )
+        HorizontalDivider()
+        SettingsNavigationRow(
+            title = stringResource(R.string.detection_test),
+            onClick = { onNavigateToRoute(MainDestinations.DETECTION_TEST_ROUTE, false, true) },
+        )
+      }
 
       SettingGroup(title = stringResource(R.string.notifications)) {
         Column(
@@ -579,6 +595,22 @@ fun Settings(
       }
     }
   }
+}
+
+@Composable
+private fun SettingsNavigationRow(
+    title: String,
+    subtitle: String? = null,
+    onClick: () -> Unit,
+) {
+  ListItem(
+      modifier = Modifier.clickable(onClick = onClick),
+      leadingContent = { Icon(Icons.Outlined.Info, contentDescription = null) },
+      headlineContent = { Text(title) },
+      supportingContent = { subtitle?.let { Text(it) } },
+      trailingContent = { Icon(painterResource(R.drawable.baseline_navigate_next_24), null) },
+      colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+  )
 }
 
 @SuppressLint("ViewModelConstructorInComposable")

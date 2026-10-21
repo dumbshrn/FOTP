@@ -119,7 +119,12 @@ fun HistoryDetail(
 
           Column() {
             Text(
-                text = detectedCode.smsOrigin.ifBlank { appInfoResult.appLabel },
+                text =
+                    detectedCodeSourceLabel(
+                        detectedCode.notificationTag,
+                        detectedCode.smsOrigin,
+                        appInfoResult.appLabel,
+                    ),
                 fontWeight = FontWeight.Medium,
                 fontSize = 16.sp,
             )

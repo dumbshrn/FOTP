@@ -19,5 +19,6 @@ class ThemeModeTest {
   @Test
   fun darkModeStaysDarkWhenSystemIsLight() {
     assertTrue(AppThemeMode.DARK.isDark(systemIsDark = false))
+    assertTrue(AppThemeMode.AMOLED.isDark(systemIsDark = false))
   }
 }
